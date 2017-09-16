@@ -1,0 +1,65 @@
+#!/bin/sh
+#################################################
+#
+# Description: 停止平台应用
+# Usage: stop <app>
+# Author: xupiao
+# Date: 2015-12-1
+# Version: v2.1
+#
+#################################################
+
+function usage() {
+   pluginDir=$VOICE_EXTEND_HOME/bin/plugins/stop
+   if [ -d $pluginDir ]; then
+      echo "Subcommand: stop"
+      echo "Extended: true"
+      echo "Desc: `cat $pluginDir/desc.txt`"
+      if [ -f $pluginDir/usage.txt ]; then
+         echo "`cat $pluginDir/usage.txt`"
+      fi
+   fi
+}
+
+###参数个数检查###
+if [ $# -lt 1 ]; then
+   usage
+   exit 1
+fi
+app=$1
+
+###检查是否正在运行###
+true_pid=`ps aux | grep java | grep $VOICE_APP_HOME | grep $app | awk '{print $2}'`
+if [ -z $true_pid ]; then
+   echo "[ERROR] the service [$app] is not running!!!"
+   exit 1
+fi
+
+###PID文件检测###
+if [ ! -f $VOICE_APP_PID ]; then
+   echo "[WARNING] $VOICE_APP_PID file is not exists!"
+elif [ $true_pid != `cat $VOICE_APP_PID` ]; then
+   echo "[WARNING] the PID in $VOICE_APP_PID is older!"
+fi
+
+###Execute###
+kill -TERM $true_pid
+echo "[INFO] the service [$app] on the $true_pid PID is stopping"
+sleep $VOICE_TIMEOUT
+
+###检测是否成功停止###
+true_pid=`ps aux | grep java | grep $VOICE_APP_HOME | grep $app | awk '{print $2}'`
+if [ ! -z $ture_pid ]; then
+   echo "[WARNING] the service [$app] on the $true_pid PID is not stopped completely. Stop service by kill -9!"
+   kill -9 $true_pid
+fi
+
+###清理PID文件###
+if [ -f $VOICE_APP_PID ]; then
+   rm -rf $VOICE_APP_PID
+   echo "[INFO] $VOICE_APP_PID file is deleted completely"
+fi
+
+echo "[INFO] the service [$app $vmid] is stopped completely"
+exit 0
+

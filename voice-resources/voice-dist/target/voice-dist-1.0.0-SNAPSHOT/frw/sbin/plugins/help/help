@@ -1,0 +1,55 @@
+#!/bin/sh
+#################################################
+#
+# Description: 显示平台脚本命令帮助说明子命令
+# Usage: help [? | <plugin>]
+# Author: xupiao
+# Date: 2015-11-12
+# Version: v2.0
+#
+#################################################
+
+###参数检查###
+if [ $# -eq 0 ]; then
+   plugin="?"
+else
+   plugin=$1
+fi
+
+###显示帮助说明###
+if [ "$plugin" == "?" ]; then
+   ###显示全部子命令插件帮助说明（默认）###
+   echo "default subcommands:"
+   for pluginDir in $VOICE_FRW_HOME/sbin/plugins/*; do
+      if [ -d $pluginDir ]; then
+         plugin=${pluginDir##*/}
+         if [ -f $pluginDir/$plugin ]; then
+            echo "     $plugin          `cat $pluginDir/desc.txt`"
+         fi
+      fi
+   done
+else
+   ###显示指定子命令插件帮助说明（扩展）###
+   pluginDir=$VOICE_EXTEND_HOME/bin/plugins/$plugin
+   if [ -d $pluginDir ]; then
+      echo "Subcommand: $plugin"
+      echo "Extended: true"
+      echo "Desc: `cat $pluginDir/desc.txt`"
+      if [ -f $pluginDir/usage.txt ]; then
+         echo "`cat $pluginDir/usage.txt`"
+      fi
+   fi
+   ###显示指定子命令插件帮助说明（默认）###
+   pluginDir=$VOICE_FRW_HOME/sbin/plugins/$plugin
+   if [ -d $pluginDir ]; then
+      echo "Subcommand: $plugin"
+      echo "Extended: false"
+      echo "Desc: `cat $pluginDir/desc.txt`"
+      if [ -f $pluginDir/usage.txt ]; then
+         echo "`cat $pluginDir/usage.txt`"
+      fi
+   fi
+fi
+
+exit 0
+

@@ -1,0 +1,30 @@
+#!/bin/sh
+#################################################
+#
+# Description: 命令插件参数设置
+# Usage: opts {plugin} [args...]
+# Author: xupiao
+# Date: 2015-12-1
+# Version: v2.1
+#
+#################################################
+
+###参数检查###
+if [ $# -lt 1 ]; then
+   echo "[ERROR] parameter of core opts command error!!!"
+   exit 1
+fi
+plugin=$1
+
+###参数移位###
+shift 1
+
+###设置默认参数###
+defaultOpts=$VOICE_FRW_HOME/sbin/plugins/$plugin/opts
+if [ -f $defaultOpts ]; then
+   echo "[INFO] defaultOpts=$defaultOpts"
+   . $defaultOpts $@
+else
+   echo "[WARNING] $plugin default opts file is not existed!"
+fi
+

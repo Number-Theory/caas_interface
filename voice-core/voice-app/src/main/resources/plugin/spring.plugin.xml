@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="spring" displayName="Spring容器插件" activator="com.yzx.auth.plugin.SpringPlugin" order="1" enable="true" failOnInitError="true"/>

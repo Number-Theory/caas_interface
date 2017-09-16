@@ -1,0 +1,54 @@
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	<id>dist</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+
+	<files>
+		<file>
+			<source>../resources/readme.txt</source>
+		</file>
+	</files>
+	<fileSets>
+		<fileSet>
+			<directory>../resources/frw</directory>
+			<outputDirectory>/frw</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>../resources/apps</directory>
+			<outputDirectory>/apps</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>../resources/conf</directory>
+			<outputDirectory>/conf</outputDirectory>
+		</fileSet>
+	</fileSets>
+
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>/frw/lib/</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<unpack>false</unpack>
+			<excludes>
+				<exclude>com.yzx.biz:voice-auth</exclude>
+			</excludes>
+		</dependencySet>
+		
+		<dependencySet>
+		        <outputDirectory>/apps/auth/lib/</outputDirectory>
+		        <useProjectArtifact>false</useProjectArtifact>
+		        <useTransitiveFiltering>true</useTransitiveFiltering>
+		        <useTransitiveDependencies>true</useTransitiveDependencies>
+		        <unpack>false</unpack>
+		        <includes>
+		        	 <include>com.yzx.biz:voice-auth</include>
+                </includes>
+        </dependencySet>
+	</dependencySets>
+
+</assembly>

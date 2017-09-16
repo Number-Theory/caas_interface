@@ -1,0 +1,24 @@
+#!/bin/sh
+#################################################
+#
+# Description: 平台架构环境参数配置扫描入口
+# Usage: 将该脚本配置在用户.bash_profile中，使其在登录时自动执行
+# Author: xupiao
+# Date: 2015-11-11
+# Version: v2.0
+#
+#################################################
+
+###设置可执行命令###
+cd $VOICE_FRW_HOME/sbin/core
+chmod 755 *
+cd $HOME
+
+###扫描架构核心环境参数配置###
+for i in $VOICE_FRW_HOME/sbin/env.d/*.env ; do
+   if [ -r $i ]; then
+      . $i
+   fi
+done
+unset i
+

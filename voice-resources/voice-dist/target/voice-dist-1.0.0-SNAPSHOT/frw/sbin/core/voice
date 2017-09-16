@@ -1,0 +1,50 @@
+#!/bin/sh
+#################################################
+#
+# Description: 平台脚本统一入口主命令
+# Usage: voice [plugin] [args...]
+# Author: xupiao
+# Date: 2015-12-1
+# Version: v2.1
+#
+#################################################
+
+###环境变量检查###
+if [ $VOICE_FRW_HOME == "" ]; then
+   echo "[ERROR] VOICE_FRW_HOME environment variable is not configured!!!"
+   exit 1
+fi
+echo "[INFO] VOICE_FRW_HOME=$VOICE_FRW_HOME"
+
+###命令插件检查:优先使用扩展命令###
+if [ $# -lt 1 ]; then
+   plugin=help
+else
+   plugin=$1
+fi
+
+pluginDir=$VOICE_FRW_HOME/sbin/plugins/$plugin
+
+if [ ! -d $pluginDir ]; then
+   echo "[ERROR] $plugin command plugin is not existed!!!"
+   exit 1
+fi
+echo "[INFO] Plugin=$pluginDir"
+
+###参数移位###
+shift 1
+
+###命令参数设置###
+. opts $plugin $@
+
+###命令接口实现调用###
+cmd=$pluginDir/$plugin
+if [ ! -f $cmd ]; then
+   echo "[ERROR] $cmd command file is not existed!!!"
+   exit 1
+fi
+
+sh -e $cmd $@
+
+exit 0
+

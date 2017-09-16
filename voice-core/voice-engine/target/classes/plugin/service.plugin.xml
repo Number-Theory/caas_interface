@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="service" displayName="serivce引擎" activator="com.yzx.engine.plugin.ServicePlugin" order="1" enable="true" failOnInitError="true"/>

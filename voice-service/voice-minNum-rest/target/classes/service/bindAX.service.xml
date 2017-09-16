@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="{version}/caas/bindax/{userId}" displayName="AX绑定接口" activator="com.caas.service.BindAXService" isAsync="true"/>
