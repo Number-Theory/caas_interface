@@ -1,18 +1,7 @@
 package com.caas.code.service;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
-
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.caas.model.AuthModel;
+import com.caas.model.Voice4ZHModel;
 import com.caas.model.VoiceCodeModel;
 import com.caas.util.CommonUtils;
 import com.google.gson.reflect.TypeToken;
@@ -29,6 +18,16 @@ import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * 语音验证码
@@ -142,6 +141,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
 
+
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";
 		logger.info("请求caas-auth组件安全鉴权包体信息authStr={},authUrl={}", authStr, authUrl);
@@ -157,11 +157,20 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 
 						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/voiceNotify";
 
+						Voice4ZHModel vc = new Voice4ZHModel();
+						vc.setAppid(ConfigUtils.getProperty("voiceCode_zh_appid", String.class));
+						vc.setCalled(voiceCodeModel.getCallee());
+						vc.setCalling(voiceCodeModel.getCaller());
+						vc.setExtkey(voiceCodeModel.getCaptchaCode());
+						vc.setExtparam(callId);
+						vc.setRepeat(String.valueOf(voiceCodeModel.getPlayTimes()));
+						vc.setUrl(ConfigUtils.getProperty("voiceCode_zh_url", String.class));
+
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
 								public void execute(HttpResponse response, String context) {
-
+									//TODO
 								}
 
 								@Override
@@ -171,7 +180,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 									setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, voiceCodeModel.getUserData());
 									HttpUtils.sendMessageJson(ctx, response.toString());
 								}
-							}).httpPost(controlUrl, JsonUtil.toJsonStr(""));// TODO
+							}).httpPost(controlUrl, JsonUtil.toJsonStr(JsonUtil.toJsonStr(vc)));// TODO
 						} catch (Exception e) {
 							logger.info("请求caas_control组件出错,ex={}", e);
 							setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, voiceCodeModel.getUserData());
