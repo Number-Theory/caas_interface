@@ -1,4 +1,0 @@
-Usage: voice status <app> <vmid>
-Parameters:
-     <app>           应用名称
-     <vmid>          应用虚拟机ID

@@ -185,7 +185,7 @@ public class BindAXService extends DefaultServiceCallBack {
 						gxInfo.setXmode("mode101");
 						gxInfo.setBindId(bindId);
 						gxInfo.setCalldisplay(minNumModel.getCalldisplay());
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumBindAX"; // TODO
+						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumBindAX";
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
@@ -214,9 +214,25 @@ public class BindAXService extends DefaultServiceCallBack {
 										orderRecordMap.put("maxAge", minNumModel.getMaxAge());
 										orderRecordMap.put("requestId", callId);
 										orderRecordMap.put("record", minNumModel.getRecord());
-										orderRecordMap.put("statusUrl", minNumModel.getStatusUrl());
-										orderRecordMap.put("hangupUrl", minNumModel.getHangupUrl());
-										orderRecordMap.put("recordUrl", minNumModel.getRecordUrl());
+										Map<String, Object> sqlParams = new HashMap<String, Object>();
+										sqlParams.put("userId", userId);
+										sqlParams.put("productType", "0");
+										Map<String, Object> callbackUrl = dao.selectOne("common.getCallBackUrl", sqlParams);
+										if (StringUtil.isBlank(minNumModel.getStatusUrl())) {
+											orderRecordMap.put("statusUrl", minNumModel.getStatusUrl());
+										} else {
+											orderRecordMap.put("statusUrl", String.valueOf(callbackUrl.get("statusUrl")));
+										}
+										if (StringUtil.isBlank(minNumModel.getHangupUrl())) {
+											orderRecordMap.put("hangupUrl", minNumModel.getHangupUrl());
+										} else {
+											orderRecordMap.put("hangupUrl", String.valueOf(callbackUrl.get("hangupUrl")));
+										}
+										if (StringUtil.isBlank(minNumModel.getRecordUrl())) {
+											orderRecordMap.put("recordUrl", minNumModel.getRecordUrl());
+										} else {
+											orderRecordMap.put("recordUrl", String.valueOf(callbackUrl.get("recordUrl")));
+										}
 										orderRecordMap.put("cityId", cityId);
 										orderRecordMap.put("productType", "1");
 										orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("data")).get("subid")));
@@ -224,7 +240,7 @@ public class BindAXService extends DefaultServiceCallBack {
 										logger.info("【AX号码绑定】订单记录哈希表插入订单记录orderRes={},orderRecordKey={},orderRecordMap={},maxAge={}", orderRes, orderRecordKey,
 												orderRecordMap, Integer.valueOf(minNumModel.getMaxAge()));
 
-										// TODO 订单入库
+										dao.insert("common.insertBindOrder", orderRecordMap);
 
 										controlResponse.getOtherMap().put("bindId", bindId);
 										controlResponse.getOtherMap().put("userData", minNumModel.getUserData());

@@ -34,7 +34,7 @@
 	
 	<!-- 根据号码获取费率 -->
 	<select id="getNumberRate">
-		select * from tb_caas_fee t where t.id in (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} limit 1)
+		select * from tb_caas_fee t where t.id in (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} limit 1)
 	</select>
 	
 	<select id="getNumInfomation" resultType="map">
@@ -62,4 +62,27 @@
 		  #{callPrice}, #{deductionUnit}, #{cdrType}, #{recordPrice}, #{recordUrl}, #{callStatusB}, #{beginTimeB}, #{endTimeB}, #{callTypeB}, #{callTimeB}, #{callPriceB},
 		   #{deductionUnitB}, #{cdrTypeB}, #{callPayMoney}, #{recordPayMoney}, #{payMoney}, now(), #{deductionStatus}, #{message}, #{userData}, #{remark});	
 	</insert>
+	
+	<insert id="insertBindOrder">
+		INSERT INTO `tb_caas_bind_order` (`userId`, `bindId`, `caller`, `dstVirtualNum`, `callee`, `maxAge`, `requestId`,
+		 `record`, `statusUrl`, `hangupUrl`, `recordUrl`, `cityId`, `productType`, `subid`, `createDate`) VALUES 
+		 (#{userId}, #{bindId}, #{caller}, #{dstVirtualNum}, #{callee}, #{maxAge}, #{requestId},
+		 #{record}, #{statusUrl}, #{hangupUrl}, #{recordUrl}, #{cityId}, #{productType}, #{subid}, now());
+	</insert>
+	
+	<select id="getBindOrderStatusUrl" resultType="string">
+		select statusUrl from tb_caas_bind_order t where t.subid = #{subid}
+	</select>
+	<select id="getBindOrderBillUrl" resultType="string">
+		select hangupUrl from tb_caas_bind_order t where t.subid = #{subid}
+	</select>
+	
+	<select id="getBindOrder" resultType="map">
+		select * from tb_caas_bind_order t where t.subid = #{subid}
+	</select>
+	
+	<select id="getCallBackUrl" resultType="map">
+		select statusUrl,hangupUrl,recordUrl from tb_caas_application t where t.userId=#{userId} and t.productType=#{productType}
+	</select>
+	
 </mapper>

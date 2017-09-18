@@ -32,6 +32,7 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 		// 根据号码获取费率
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("phoneNumber", caller);
+		params.put("productType", productType);
 		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
 		if (rateMap == null || rateMap.isEmpty()) {
 			logger.info("获取号码套餐失败，查询默认套餐！");
@@ -51,11 +52,14 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 				callTime = billingModel.getCallTime();
 				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
 					callPrice = (Long) rateMap.get("iddPrice");
+					billingModel.setCallType("2");
 				} else {
 					if (callerCity.equals(calledCity)) { // 市话
 						callPrice = (Long) rateMap.get("localPrice");
+						billingModel.setCallType("0");
 					} else { // 长途
 						callPrice = (Long) rateMap.get("dddPrice");
+						billingModel.setCallType("1");
 					}
 				}
 			}
@@ -68,11 +72,14 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 				callTime = billingModel.getCallTime();
 				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
 					callPrice = (Long) rateMap.get("iddPrice");
+					billingModel.setCallType("2");
 				} else {
 					if (callerCity.equals(calledCity)) { // 市话
 						callPrice = (Long) rateMap.get("localPrice");
+						billingModel.setCallType("0");
 					} else { // 长途
 						callPrice = (Long) rateMap.get("dddPrice");
+						billingModel.setCallType("1");
 					}
 				}
 			}

@@ -56,6 +56,12 @@ public class DateUtil {
 		long times = sdf.parse(time).getTime();
 		return times;
 	}
+	
+	public static long getTime(String time, String format) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		long times = sdf.parse(time).getTime();
+		return times;
+	}
 
 	/**
 	 * 将java.util.Date对象转换为java.sql.Timestamp对象

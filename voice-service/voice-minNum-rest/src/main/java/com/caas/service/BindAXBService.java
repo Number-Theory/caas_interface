@@ -258,9 +258,25 @@ public class BindAXBService extends DefaultServiceCallBack {
 										orderRecordMap.put("maxAge", safetyCallModel.getMaxAge());
 										orderRecordMap.put("requestId", callId);
 										orderRecordMap.put("record", safetyCallModel.getRecord());
-										orderRecordMap.put("statusUrl", safetyCallModel.getStatusUrl());
-										orderRecordMap.put("hangupUrl", safetyCallModel.getHangupUrl());
-										orderRecordMap.put("recordUrl", safetyCallModel.getRecordUrl());
+										Map<String, Object> sqlParams = new HashMap<String, Object>();
+										sqlParams.put("userId", userId);
+										sqlParams.put("productType", "0");
+										Map<String, Object> callbackUrl = dao.selectOne("common.getCallBackUrl", sqlParams);
+										if (StringUtil.isBlank(safetyCallModel.getStatusUrl())) {
+											orderRecordMap.put("statusUrl", safetyCallModel.getStatusUrl());
+										} else {
+											orderRecordMap.put("statusUrl", String.valueOf(callbackUrl.get("statusUrl")));
+										}
+										if (StringUtil.isBlank(safetyCallModel.getHangupUrl())) {
+											orderRecordMap.put("hangupUrl", safetyCallModel.getHangupUrl());
+										} else {
+											orderRecordMap.put("hangupUrl", String.valueOf(callbackUrl.get("hangupUrl")));
+										}
+										if (StringUtil.isBlank(safetyCallModel.getRecordUrl())) {
+											orderRecordMap.put("recordUrl", safetyCallModel.getRecordUrl());
+										} else {
+											orderRecordMap.put("recordUrl", String.valueOf(callbackUrl.get("recordUrl")));
+										}
 										orderRecordMap.put("cityId", cityId);
 										orderRecordMap.put("productType", "0");
 										if (resultMap.containsKey("data")) { // 绑定
@@ -272,7 +288,7 @@ public class BindAXBService extends DefaultServiceCallBack {
 										logger.info("【AXB号码绑定】订单记录哈希表插入订单记录orderRes={},orderRecordKey={},orderRecordMap={},maxAge={}", orderRes,
 												orderRecordKey, orderRecordMap, Integer.valueOf(safetyCallModel.getMaxAge()));
 
-										// TODO 订单入库
+										dao.insert("common.insertBindOrder", orderRecordMap);
 
 										controlResponse.getOtherMap().put("bindId", bindId);
 										controlResponse.getOtherMap().put("userData", safetyCallModel.getUserData());

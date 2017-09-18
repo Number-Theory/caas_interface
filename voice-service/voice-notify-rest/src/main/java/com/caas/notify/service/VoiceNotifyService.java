@@ -17,13 +17,16 @@ import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +37,7 @@ import java.util.UUID;
  * @author xupiao 2017年9月11日
  *
  */
+@Service
 public class VoiceNotifyService extends DefaultServiceCallBack {
 
 	private static final Logger logger = LogManager.getLogger(VoiceNotifyService.class);
@@ -154,16 +158,16 @@ public class VoiceNotifyService extends DefaultServiceCallBack {
 					}.getType());
 					if (BusiErrorCode.B_000000.getErrCode().equals(authResponse.getResult())) {
 
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/voiceNotify";
+						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/voiceNotify4ZH";
 						Voice4ZHModel vc = new Voice4ZHModel();
 						vc.setAppid(ConfigUtils.getProperty("voiceCode_zh_appid", String.class));
 						vc.setCalled(voiceNotifyModel.getCallee());
 						vc.setCalling(voiceNotifyModel.getCaller());
-						//TODO
-//						vc.setExtkey2(voiceNotifyModel.getContent());
+						// TODO
+						// vc.setExtkey2(voiceNotifyModel.getContent());
 						vc.setExtparam(callId);
 						vc.setRepeat(String.valueOf(voiceNotifyModel.getPlayTimes()));
-						vc.setUrl(ConfigUtils.getProperty("voiceCode_zh_url", String.class));
+						vc.setUrl(ConfigUtils.getProperty("voiceNotify_callback_url", String.class));
 
 						try {
 							new HttpClient1(new ClientHandler() {
@@ -179,7 +183,7 @@ public class VoiceNotifyService extends DefaultServiceCallBack {
 									setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, voiceNotifyModel.getUserData());
 									HttpUtils.sendMessageJson(ctx, response.toString());
 								}
-							}).httpPost(controlUrl, JsonUtil.toJsonStr(""));// TODO
+							}).httpPost(controlUrl, JsonUtil.toJsonStr(vc));// TODO
 						} catch (Exception e) {
 							logger.info("请求caas_control组件出错,ex={}", e);
 							setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, voiceNotifyModel.getUserData());

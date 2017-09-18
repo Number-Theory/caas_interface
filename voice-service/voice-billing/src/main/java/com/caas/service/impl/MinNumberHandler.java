@@ -34,6 +34,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		// 根据号码获取费率
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("phoneNumber", caller);
+		params.put("productType", productType);
 		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
 		if (rateMap == null || rateMap.isEmpty()) {
 			logger.info("获取号码套餐失败，查询默认套餐！");
@@ -55,11 +56,14 @@ public class MinNumberHandler extends DefaultBillingHandler {
 				callTime = billingModel.getCallTime();
 				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
 					callPrice = (Long) rateMap.get("iddPrice");
+					billingModel.setCallType("2");
 				} else {
 					if (callerCity.equals(calledCity)) { // 市话
 						callPrice = (Long) rateMap.get("localPrice");
+						billingModel.setCallType("0");
 					} else { // 长途
 						callPrice = (Long) rateMap.get("dddPrice");
+						billingModel.setCallType("1");
 					}
 				}
 			}
@@ -67,11 +71,14 @@ public class MinNumberHandler extends DefaultBillingHandler {
 				callTimeB = billingModel.getCallTimeB();
 				if (NumberUtils.isInternationalPhone(billingModel.getRealityNumber())) { // 国际电话
 					callPriceB = (Long) rateMap.get("iddPrice");
+					billingModel.setCallTypeB("2");
 				} else {
 					if (callerCityB.equals(calledCityB)) { // 市话
 						callPriceB = (Long) rateMap.get("localPrice");
+						billingModel.setCallTypeB("0");
 					} else { // 长途
 						callPriceB = (Long) rateMap.get("dddPrice");
+						billingModel.setCallTypeB("1");
 					}
 				}
 			}
@@ -85,22 +92,28 @@ public class MinNumberHandler extends DefaultBillingHandler {
 					callTime = billingModel.getCallTimeB();
 					if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
 						callPrice = (Long) rateMap.get("iddPrice");
+						billingModel.setCallType("2");
 					} else {
 						if (callerCity.equals(calledCity)) { // 市话
 							callPrice = (Long) rateMap.get("localPrice");
+							billingModel.setCallType("0");
 						} else { // 长途
 							callPrice = (Long) rateMap.get("dddPrice");
+							billingModel.setCallType("1");
 						}
 					}
 
 					callTimeB = billingModel.getCallTimeB();
 					if (NumberUtils.isInternationalPhone(billingModel.getRealityNumber())) { // 国际电话
 						callPriceB = (Long) rateMap.get("iddPrice");
+						billingModel.setCallTypeB("2");
 					} else {
 						if (callerCityB.equals(calledCityB)) { // 市话
 							callPriceB = (Long) rateMap.get("localPrice");
+							billingModel.setCallTypeB("0");
 						} else { // 长途
 							callPriceB = (Long) rateMap.get("dddPrice");
+							billingModel.setCallTypeB("1");
 						}
 					}
 				}

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/minNumDXBill" displayName="东信AX话单回调接口"
+	activator="com.caas.service.minNum.MinNumDXBillService" />

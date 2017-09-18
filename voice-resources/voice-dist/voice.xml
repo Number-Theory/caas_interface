@@ -36,19 +36,33 @@
 			<unpack>false</unpack>
 			<excludes>
 				<exclude>com.yzx.biz:voice-auth</exclude>
+				<exclude>com.yzx.biz:voice-billing</exclude>
+				<exclude>com.yzx.biz:voice-callback</exclude>
+				<exclude>com.yzx.biz:voice-code-rest</exclude>
+				<exclude>com.yzx.biz:voice-control</exclude>
+				<exclude>com.yzx.biz:voice-fee</exclude>
+				<exclude>com.yzx.biz:voice-minNum-rest</exclude>
+				<exclude>com.yzx.biz:voice-notify-rest</exclude>
 			</excludes>
 		</dependencySet>
-		
+
 		<dependencySet>
-		        <outputDirectory>/apps/auth/lib/</outputDirectory>
-		        <useProjectArtifact>false</useProjectArtifact>
-		        <useTransitiveFiltering>true</useTransitiveFiltering>
-		        <useTransitiveDependencies>true</useTransitiveDependencies>
-		        <unpack>false</unpack>
-		        <includes>
-		        	 <include>com.yzx.biz:voice-auth</include>
-                </includes>
-        </dependencySet>
+			<outputDirectory>/apps/caas/lib/</outputDirectory>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<unpack>false</unpack>
+			<includes>
+				<include>com.yzx.biz:voice-auth</include>
+				<include>com.yzx.biz:voice-billing</include>
+				<include>com.yzx.biz:voice-callback</include>
+				<include>com.yzx.biz:voice-code-rest</include>
+				<include>com.yzx.biz:voice-control</include>
+				<include>com.yzx.biz:voice-fee</include>
+				<include>com.yzx.biz:voice-minNum-rest</include>
+				<include>com.yzx.biz:voice-notify-rest</include>
+			</includes>
+		</dependencySet>
 	</dependencySets>
 
 </assembly>
