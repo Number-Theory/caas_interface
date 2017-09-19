@@ -21,6 +21,7 @@ import com.caas.service.impl.VoiceNotifyHandler;
 import com.google.gson.reflect.TypeToken;
 import com.yzx.access.callback.ClientHandler;
 import com.yzx.access.client.HttpClient;
+import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
@@ -61,30 +62,30 @@ public class BillingService extends DefaultServiceCallBack {
 		// 对接扣费组件
 		DeductionModel deductionModel = new DeductionModel();
 		deductionModel.setDeductionCode(billingModel.getCallID());
-		deductionModel.setDeductionMoney(0L); // TODO 总金额
+		deductionModel.setDeductionMoney((Long)response.getOtherMap().get("payMoney")); // 总金额
 		deductionModel.setDeductionType("0");
 		deductionModel.setEvent(DEDUCTION_EVENT);
 		deductionModel.setProductType(productType);
 		deductionModel.setUserData(billingModel.getUserData());
-		deductionModel.setUserID(billingModel.getUserID());
+		deductionModel.setUserId(billingModel.getUserId());
 
+		String deductionUrl = ConfigUtils.getProperty("deductionUrl", String.class);
 		try {
 			new HttpClient(new ClientHandler() {
 				@Override
 				public void failed(Exception ex) {
-					//TODO
+					logger.error("扣费失败", ex);
 				}
 
 				@Override
 				public void execute(HttpResponse response, String context) {
-					
+					logger.info("扣费完成：{}", context);
 				}
-			}).httpPost("", JsonUtil.toJsonStr(deductionModel));
+			}).httpPost(deductionUrl, JsonUtil.toJsonStr(deductionModel)); //
 		} catch (Exception e) {
-			//TODO 
+			// TODO
 			logger.error("请求扣费组件失败：", e);
 		}
 
 	}
-
 }

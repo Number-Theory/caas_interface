@@ -11,6 +11,8 @@ public class RedisKeyConsts {
 	
 	public final static String AXBNUMBINDS = "AXBNUMBINDS:";
 	
+	public final static String VOICE_CODE_SESSION = "VCSESSION:";
+	
 	public final static String ORDERBINDS = "ORDERBINDS:";
 	
 	public static String getKey(String... args) {

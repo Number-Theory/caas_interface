@@ -45,7 +45,7 @@ public class VoiceNotify4ZHService extends DefaultServiceCallBack {
 		// 请求东信绑定接口
 		String respData = null;
 		try {
-			Map<String, Object> headerMap = new HashMap<>();
+			Map<String, String> headerMap = new HashMap<>();
 			headerMap.put("appid", vc.getAppid());
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 			String time = df.format(new Date());
@@ -53,7 +53,7 @@ public class VoiceNotify4ZHService extends DefaultServiceCallBack {
 			EncryptUtil md5 = new EncryptUtil();
 			headerMap.put("sigkey", md5.md5Digest(vc.getAppid() + ConfigUtils.getProperty("voiceCode_zh_token", String.class) + time));
 			headerMap.put("termip", CommonUtils.getUnixIP());
-			respData = HttpUtils.httpConnectionPostXML(url, XMLUtil.convertToXml(vc));
+			respData = HttpUtils.httpConnectionPostXML(url, XMLUtil.convertToXml(vc), headerMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

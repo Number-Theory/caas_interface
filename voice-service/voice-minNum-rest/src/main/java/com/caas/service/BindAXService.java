@@ -141,8 +141,8 @@ public class BindAXService extends DefaultServiceCallBack {
 			return;
 		}
 
-		if (StringUtil.isNotEmpty(cityId)) {
-			minNumModel.setCityId((String) numberMap.get("city"));
+		if (StringUtil.isEmpty(cityId)) {
+			minNumModel.setCityId((String) numberMap.get("cityCode"));
 		}
 
 		// 请求公共鉴权组件
@@ -195,7 +195,7 @@ public class BindAXService extends DefaultServiceCallBack {
 									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 									}.getType());
 									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
-											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(resultMap.get("code")))) {
+											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(String.valueOf(resultMap.get("code"))))) {
 										Map<String, String> calleeBindIdMap = new HashMap<String, String>();
 										calleeBindIdMap.put("caller", minNumModel.getCaller());
 										calleeBindIdMap.put("bindId", bindId);
@@ -218,22 +218,22 @@ public class BindAXService extends DefaultServiceCallBack {
 										sqlParams.put("userId", userId);
 										sqlParams.put("productType", "0");
 										Map<String, Object> callbackUrl = dao.selectOne("common.getCallBackUrl", sqlParams);
-										if (StringUtil.isBlank(minNumModel.getStatusUrl())) {
+										if (StringUtil.isNotEmpty(minNumModel.getStatusUrl())) {
 											orderRecordMap.put("statusUrl", minNumModel.getStatusUrl());
 										} else {
-											orderRecordMap.put("statusUrl", String.valueOf(callbackUrl.get("statusUrl")));
+											orderRecordMap.put("statusUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("statusUrl")), ""));
 										}
-										if (StringUtil.isBlank(minNumModel.getHangupUrl())) {
+										if (StringUtil.isNotEmpty(minNumModel.getHangupUrl())) {
 											orderRecordMap.put("hangupUrl", minNumModel.getHangupUrl());
 										} else {
-											orderRecordMap.put("hangupUrl", String.valueOf(callbackUrl.get("hangupUrl")));
+											orderRecordMap.put("hangupUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("hangupUrl")), ""));
 										}
-										if (StringUtil.isBlank(minNumModel.getRecordUrl())) {
+										if (StringUtil.isNotEmpty(minNumModel.getRecordUrl())) {
 											orderRecordMap.put("recordUrl", minNumModel.getRecordUrl());
 										} else {
-											orderRecordMap.put("recordUrl", String.valueOf(callbackUrl.get("recordUrl")));
+											orderRecordMap.put("recordUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("recordUrl")), ""));
 										}
-										orderRecordMap.put("cityId", cityId);
+										orderRecordMap.put("cityId", minNumModel.getCityId());
 										orderRecordMap.put("productType", "1");
 										orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("data")).get("subid")));
 										String orderRes = RedisOpClient.hmset(orderRecordKey, orderRecordMap, Integer.valueOf(minNumModel.getMaxAge()));

@@ -45,7 +45,7 @@ public class VoiceCode4ZHService extends DefaultServiceCallBack {
 		// 请求东信绑定接口
 		String respData = null;
 		try {
-			Map<String, Object> headerMap = new HashMap<>();
+			Map<String, String> headerMap = new HashMap<>();
 			headerMap.put("appid", vc.getAppid());
 			DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 			String time = df.format(new Date());
@@ -53,7 +53,7 @@ public class VoiceCode4ZHService extends DefaultServiceCallBack {
 			EncryptUtil md5 = new EncryptUtil();
 			headerMap.put("sigkey", md5.md5Digest(vc.getAppid() + ConfigUtils.getProperty("voiceCode_zh_token", String.class) + time));
 			headerMap.put("termip", CommonUtils.getUnixIP());
-			respData = HttpUtils.httpConnectionPostXML(url, XMLUtil.convertToXml(vc));
+			respData = HttpUtils.httpConnectionPostXML(url, XMLUtil.convertToXml(vc), headerMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,13 +61,11 @@ public class VoiceCode4ZHService extends DefaultServiceCallBack {
 
 		if (null != respData && respData != "") {
 			VoiceCode4ZHCallbackModel vcResp = (VoiceCode4ZHCallbackModel) XMLUtil.convertXmlStrToObject(VoiceCode4ZHCallbackModel.class, respData);
-			setResponse(vc.getExtparam(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");
-			Map<String, Object> params = new HashMap<>();
-			params.put("result", vcResp.getRecid());
-			params.put("desc", vcResp.getDesc());
-			params.put("shownum", vcResp.getShownum());
-			params.put("recid", vcResp.getRecid());
-			response.getOtherMap().putAll(params);
+			if("0".equals(vcResp.getResult())) {
+				setResponse(vc.getExtparam(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");
+			} else {
+				setResponse(vc.getExtparam(), response, BusiErrorCode.B_100035, CONTROL_EVENT, "");
+			}
 		} else {
 			setResponse(vc.getExtparam(), response, BusiErrorCode.B_900000, CONTROL_EVENT, "");
 		}

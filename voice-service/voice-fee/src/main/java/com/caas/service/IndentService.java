@@ -20,7 +20,7 @@ import com.yzx.engine.spi.impl.DefaultServiceCallBack;
 @Service
 public class IndentService extends DefaultServiceCallBack {
 	private static final Logger logger = LogManager.getLogger(IndentService.class);
-	
+
 	@Override
 	public void callService(ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response, Map<String, Object> paramsObject) {
 		super.callService(ctx, request, response, paramsObject);

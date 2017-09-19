@@ -56,7 +56,7 @@ public class SafetyCallUpdateAXBService extends DefaultServiceCallBack {
 		String body = JsonUtil.toJsonStr(param);
 
 		// 封装请求广西东信的接口路径
-		String url = ConfigUtils.getProperty("baseUrl_gx", String.class) + ConfigUtils.getProperty("bindNumberUrl_gx_axb", String.class) + "/" + subid;
+		String url = ConfigUtils.getProperty("baseUrl_gx", String.class) + ConfigUtils.getProperty("updateNumberUrl_gx_axb", String.class) + "/" + subid;
 		logger.info("【请求广西东信绑定更新接口路径】url={}", url);
 
 		// 请求东信解除绑定接口

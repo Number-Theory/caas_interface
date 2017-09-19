@@ -7,11 +7,13 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.caas.dao.CaasDao;
 import com.caas.model.DeductionModel;
 import com.google.gson.reflect.TypeToken;
+import com.yzx.auth.plugin.SpringContext;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
@@ -26,6 +28,7 @@ import com.yzx.engine.spi.impl.DefaultServiceCallBack;
 public class DeductionService extends DefaultServiceCallBack {
 	private static final Logger logger = LogManager.getLogger(DeductionService.class);
 
+	@Autowired
 	private CaasDao dao;
 
 	@Override
@@ -34,7 +37,7 @@ public class DeductionService extends DefaultServiceCallBack {
 		DeductionModel deductionModel = JsonUtil.fromJson(request.getRequestString(), new TypeToken<DeductionModel>() {
 		}.getType());
 
-		String userId = deductionModel.getUserID();
+		String userId = deductionModel.getUserId();
 
 		// 更新账户余额
 		Map<String, Object> map = new HashMap<String, Object>();

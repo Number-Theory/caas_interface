@@ -121,14 +121,14 @@ public class UnBindAXService extends DefaultServiceCallBack {
 									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 									}.getType());
 									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
-											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(resultMap.get("code")))) {
+											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(String.valueOf(resultMap.get("code"))))) {
 
 										RedisOpClient.delKey(calleeNumBindKey);
 										logger.info("【AX号码解绑】删除绑定关系callerNumBindKey={}", calleeNumBindKey);
 
 										String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
 										RedisOpClient.delKey(orderRecordKey);
-										logger.info("【AX号码解绑】删除订单关系callerNumBindKey={}", calleeNumBindKey);
+										logger.info("【AX号码解绑】删除订单关系orderRecordKey={}", orderRecordKey);
 
 										// TODO 订单状态更新
 
@@ -137,7 +137,7 @@ public class UnBindAXService extends DefaultServiceCallBack {
 										HttpUtils.sendMessageJson(ctx, controlResponse.toString());
 
 									} else {
-										if (resultMap != null && resultMap.containsKey("code") && !"0".equals(resultMap.get("code"))) {
+										if (resultMap != null && resultMap.containsKey("code") && !"0".equals(String.valueOf(resultMap.get("code")))) {
 											setResponse(callId, controlResponse, BusiErrorCode.B_100028, REST_EVENT, minNumModel.getUserData());
 											logger.error("【AX号码解绑】号码解绑失败[{}].", resultMap);
 										}

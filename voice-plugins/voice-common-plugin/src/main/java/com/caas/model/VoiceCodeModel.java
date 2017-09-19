@@ -14,6 +14,15 @@ public class VoiceCodeModel extends BaseModel {
 	private String userData; // 用户透传数据
 	private String billUrl; // 话单回调地址
 	private String statusUrl;// 状态回调地址
+	private String userId;
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
 	public String getCaptchaCode() {
 		return captchaCode;

@@ -13,7 +13,7 @@ public class DeductionModel extends BaseModel {
 	private static final long serialVersionUID = -4709667519492306256L;
 
 	private String event;
-	private String userID;
+	private String userId;
 	private String productType;
 	private String deductionType;
 	private String deductionCode;
@@ -28,12 +28,12 @@ public class DeductionModel extends BaseModel {
 		this.event = event;
 	}
 
-	public String getUserID() {
-		return userID;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setUserID(String userID) {
-		this.userID = userID;
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getProductType() {

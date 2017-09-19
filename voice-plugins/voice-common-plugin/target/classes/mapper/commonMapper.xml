@@ -25,7 +25,7 @@
 	</select>
 	
 	<update id="updateBalance">
-		update tb_caas_balance set balance=balance - #{payMoney},updateTime=now() where userId=#{userId};
+		update tb_caas_balance set balance=balance - #{balance},updateTime=now() where userId=#{userId};
 	</update>
 	
 	<update id="updateDeductionStatus">
@@ -33,8 +33,12 @@
 	</update>
 	
 	<!-- 根据号码获取费率 -->
-	<select id="getNumberRate">
-		select * from tb_caas_fee t where t.id in (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} limit 1)
+	<select id="getNumberRate" resultType="map">
+		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} limit 1)
+	</select>
+	
+	<select id="getNumberReSidueUnit" resultType="long">
+		select reSidueUnit from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} and n.userId=#{userId}
 	</select>
 	
 	<select id="getNumInfomation" resultType="map">
@@ -43,7 +47,8 @@
 	</select>
 	
 	<update id="updateRateDeductionUnit">
-		update tb_caas_fee t set t.gratisUnit = t.gratisUnit-#{deductionUtit} where t.id=#{rateId};
+		update tb_caas_phonenumber t set t.employUnit = t.employUnit+#{deductionUtit},t.reSidueUnit = t.reSidueUnit-#{reSidueUnit} 
+		where t.id=#{rateId} and t.productType=#{productType} and t.userId=#{userId};
 	</update>
 	
 	<select id="getNumByUserIdAndProductType" resultType="map">
@@ -83,6 +88,14 @@
 	
 	<select id="getCallBackUrl" resultType="map">
 		select statusUrl,hangupUrl,recordUrl from tb_caas_application t where t.userId=#{userId} and t.productType=#{productType}
+	</select>
+	
+	<select id="getAppBillUrl" resultType="string">
+		select hangupUrl from tb_caas_application t where t.userId=#{userId} and t.productType=#{productType}
+	</select>
+	
+	<select id="getNumberCityId" resultType="string">
+		select cityCode from tb_caas_phoneNumber t where t.phoneNumber=#{phoneNumber} limit 1
 	</select>
 	
 </mapper>

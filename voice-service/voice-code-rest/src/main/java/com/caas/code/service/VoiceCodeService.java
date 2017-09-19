@@ -1,5 +1,18 @@
 package com.caas.code.service;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+
 import com.caas.model.AuthModel;
 import com.caas.model.Voice4ZHModel;
 import com.caas.model.VoiceCodeModel;
@@ -18,19 +31,8 @@ import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.UUID;
+import com.yzx.redis.RedisKeyConsts;
+import com.yzx.redis.RedisOpClient;
 
 /**
  * 语音验证码
@@ -64,6 +66,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 		VoiceCodeModel voiceCodeModel = JsonUtil.fromJson(request.getRequestString(), new TypeToken<VoiceCodeModel>() {
 		}.getType());
 
+		voiceCodeModel.setUserId(userId);
 		String userData = voiceCodeModel.getUserData();
 		String caller = voiceCodeModel.getCaller();
 		String callee = voiceCodeModel.getCallee();
@@ -145,7 +148,6 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
 
-
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";
 		logger.info("请求caas-auth组件安全鉴权包体信息authStr={},authUrl={}", authStr, authUrl);
@@ -170,11 +172,15 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 						vc.setRepeat(String.valueOf(voiceCodeModel.getPlayTimes()));
 						vc.setUrl(ConfigUtils.getProperty("voiceCode_callback_url", String.class));
 
+						RedisOpClient.set(RedisKeyConsts.getKey(RedisKeyConsts.VOICE_CODE_SESSION, callId), JsonUtil.toJsonStr(voiceCodeModel));
+
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
 								public void execute(HttpResponse response, String context) {
-									//TODO
+									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
+									}.getType());
+									HttpUtils.sendMessageJson(ctx, controlResponse.toString());
 								}
 
 								@Override

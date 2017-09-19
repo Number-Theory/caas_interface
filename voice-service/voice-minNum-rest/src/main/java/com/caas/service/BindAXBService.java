@@ -149,8 +149,8 @@ public class BindAXBService extends DefaultServiceCallBack {
 		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXBNUMBINDS, callee, dstVirtualNum);
 		final Map<String, String> calleeBindIdMapOld = RedisOpClient.hgetall(calleeNumBindKey);
 
-		if (StringUtil.isNotEmpty(cityId)) {
-			safetyCallModel.setCityId((String) numberMap.get("city"));
+		if (StringUtil.isEmpty(cityId)) {
+			safetyCallModel.setCityId((String) numberMap.get("cityCode"));
 		}
 
 		// 请求公共鉴权组件
@@ -220,7 +220,7 @@ public class BindAXBService extends DefaultServiceCallBack {
 									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 									}.getType());
 									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
-											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(resultMap.get("code")))) {
+											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(String.valueOf(resultMap.get("code"))))) {
 
 										RedisOpClient.delKey(callerNumBindKey);
 										RedisOpClient.delKey(calleeNumBindKey);
@@ -262,22 +262,22 @@ public class BindAXBService extends DefaultServiceCallBack {
 										sqlParams.put("userId", userId);
 										sqlParams.put("productType", "0");
 										Map<String, Object> callbackUrl = dao.selectOne("common.getCallBackUrl", sqlParams);
-										if (StringUtil.isBlank(safetyCallModel.getStatusUrl())) {
+										if (StringUtil.isNotEmpty(safetyCallModel.getStatusUrl())) {
 											orderRecordMap.put("statusUrl", safetyCallModel.getStatusUrl());
 										} else {
-											orderRecordMap.put("statusUrl", String.valueOf(callbackUrl.get("statusUrl")));
+											orderRecordMap.put("statusUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("statusUrl")), ""));
 										}
-										if (StringUtil.isBlank(safetyCallModel.getHangupUrl())) {
+										if (StringUtil.isNotEmpty(safetyCallModel.getHangupUrl())) {
 											orderRecordMap.put("hangupUrl", safetyCallModel.getHangupUrl());
 										} else {
-											orderRecordMap.put("hangupUrl", String.valueOf(callbackUrl.get("hangupUrl")));
+											orderRecordMap.put("hangupUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("hangupUrl")), ""));
 										}
-										if (StringUtil.isBlank(safetyCallModel.getRecordUrl())) {
+										if (StringUtil.isNotEmpty(safetyCallModel.getRecordUrl())) {
 											orderRecordMap.put("recordUrl", safetyCallModel.getRecordUrl());
 										} else {
-											orderRecordMap.put("recordUrl", String.valueOf(callbackUrl.get("recordUrl")));
+											orderRecordMap.put("recordUrl", ObjectUtils.defaultIfNull(String.valueOf(callbackUrl.get("recordUrl")), ""));
 										}
-										orderRecordMap.put("cityId", cityId);
+										orderRecordMap.put("cityId", safetyCallModel.getCityId());
 										orderRecordMap.put("productType", "0");
 										if (resultMap.containsKey("data")) { // 绑定
 											orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("data")).get("subid")));

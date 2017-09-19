@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import com.caas.dao.CaasDao;
 import com.caas.model.BillingModel;
 import com.caas.util.NumberUtils;
+import com.yzx.auth.plugin.SpringContext;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceResponse;
 
@@ -22,12 +23,12 @@ public class MinNumberHandler extends DefaultBillingHandler {
 
 	private static final Logger logger = LogManager.getLogger(MinNumberHandler.class);
 
-	private CaasDao dao;
+	private CaasDao dao = SpringContext.getInstance(CaasDao.class);
 
 	@Override
 	public void handler(BillingModel billingModel, ServiceResponse response) {
 
-		String userId = billingModel.getUserID();
+		String userId = billingModel.getUserId();
 		String productType = billingModel.getProductType();
 		String caller = billingModel.getCaller();
 
@@ -35,11 +36,14 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("phoneNumber", caller);
 		params.put("productType", productType);
+		params.put("userId", billingModel.getUserId());
+		boolean flag = true;
 		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
 		if (rateMap == null || rateMap.isEmpty()) {
 			logger.info("获取号码套餐失败，查询默认套餐！");
 			params.put("phoneNumber", "0");
 			rateMap = dao.selectOne("common.getNumberRate", params);
+			flag = false;
 		}
 		logger.info("查询到的套餐为[{}]", rateMap);
 
@@ -128,12 +132,21 @@ public class MinNumberHandler extends DefaultBillingHandler {
 			recordPayMoney = recordPrice * deductionUnitB;
 		}
 
-		Long gratisUnit = (Long) rateMap.get("gratisUnit");
+		Long gratisUnit = 0L;
+		if (flag) {
+			Map<String, Object> sqlParams = new HashMap<String, Object>();
+			sqlParams.put("phoneNumber", caller);
+			sqlParams.put("productType", billingModel.getProductType());
+			sqlParams.put("userId", billingModel.getUserId());
+			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);
+		}
 		String cdrType = "1";
 		if (gratisUnit >= deductionUnit) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnit);
 			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnit);
 			cdrType = "0";
 			deductionUnit = 0L;
@@ -141,6 +154,8 @@ public class MinNumberHandler extends DefaultBillingHandler {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
 			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnit);
 			cdrType = "0";
 			deductionUnit = deductionUnit - gratisUnit;
@@ -208,7 +223,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		bill.put("recordPayMoney", recordPayMoney);// 录音费用
 		bill.put("payMoney", payMoney);// 总费用
 		bill.put("deductionStatus", "1");
-		
+
 		dao.insert("common.insertBill", bill);
 		// 设置响应值
 		response.getOtherMap().putAll(JsonUtil.jsonStrToMap(JsonUtil.toJsonStr(billingModel)));

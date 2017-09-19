@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.caas.dao.CaasDao;
+import com.yzx.auth.plugin.SpringContext;
+import com.yzx.core.util.StringUtil;
 
 /**
  * 
@@ -12,7 +14,7 @@ import com.caas.dao.CaasDao;
  */
 public class NumberUtils {
 
-	private static CaasDao dao;
+	private static CaasDao dao = SpringContext.getInstance(CaasDao.class);
 
 	/**
 	 * 判断是否是国籍号码
@@ -32,6 +34,13 @@ public class NumberUtils {
 	 * @return
 	 */
 	public static String getMobileAttribution(String mobile) {
+		if (mobile.startsWith("12599")) {
+			String cityId = dao.selectOne("common.getNumberCityId", mobile);
+			if (StringUtil.isNotEmpty(cityId)) {
+				return cityId;
+			}
+			return "0";
+		}
 		if (CommonUtils.getPhoneType(mobile) == CommonUtils.FIXED_PHONE) { // 固话
 			String cityId = CommonUtils.getPhoneCityId(mobile);
 			return cityId;
@@ -50,5 +59,4 @@ public class NumberUtils {
 		sqlParams.put("mobile", mobile.substring(0, 7));
 		return dao.selectOne("common.getNumInfomation", sqlParams);
 	}
-
 }

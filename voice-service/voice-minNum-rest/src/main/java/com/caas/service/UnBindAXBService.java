@@ -96,7 +96,6 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 					ServiceResponse authResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
 					if (BusiErrorCode.B_000000.getErrCode().equals(authResponse.getResult())) {
-						// TODO
 						String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, safetyCallModel.getBindId());
 						Map<String, String> orderRecordMap = RedisOpClient.hgetall(orderRecordKey);
 						if (orderRecordMap == null || orderRecordMap.isEmpty()) {
@@ -115,7 +114,7 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 						gxInfo.setSubid(subid);
 						gxInfo.setRequestId(callId);
 
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnbindAXB"; // TODO
+						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnbindAXB";
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
@@ -125,7 +124,7 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 									}.getType());
 									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
-											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(resultMap.get("code")))) {
+											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(String.valueOf(resultMap.get("code"))))) {
 
 										RedisOpClient.delKey(callerNumBindKey);
 										logger.info("【AXB号码解绑】删除绑定关系callerNumBindKey={}", callerNumBindKey);
@@ -134,7 +133,7 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 
 										String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, safetyCallModel.getBindId());
 										RedisOpClient.delKey(orderRecordKey);
-										logger.info("【AXB号码解绑】删除订单关系callerNumBindKey={}", calleeNumBindKey);
+										logger.info("【AXB号码解绑】删除订单关系orderRecordKey={}", orderRecordKey);
 
 										// TODO 订单状态更新
 
@@ -143,7 +142,7 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 										HttpUtils.sendMessageJson(ctx, controlResponse.toString());
 
 									} else {
-										if (resultMap != null && resultMap.containsKey("code") && !"0".equals(resultMap.get("code"))) {
+										if (resultMap != null && resultMap.containsKey("code") && !"0".equals(String.valueOf(resultMap.get("code")))) {
 											setResponse(callId, controlResponse, BusiErrorCode.B_100028, REST_EVENT, safetyCallModel.getUserData());
 											logger.error("【AXB号码解绑】号码解绑失败[{}].", resultMap);
 										}
