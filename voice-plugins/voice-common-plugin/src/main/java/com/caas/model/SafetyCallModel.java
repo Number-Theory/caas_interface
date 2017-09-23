@@ -13,6 +13,8 @@ public class SafetyCallModel extends BaseModel {
 	private String caller;// 必选 主叫号码(必须为11位手机号，号码前加0086，如008613631686024)
 	private String callee;// 必选 规则同caller
 	private String dstVirtualNum;// 必选 分配的直呼虚拟中间保护号码
+	private String callerdisplay = "0"; // 来显控制 0：显示真实号码 1：显示 X 号码
+	private String calleedisplay = "0"; // 来显控制 0：显示真实号码 1：显示 X 号码
 	private String maxAge;// 必选主被叫+虚拟保护号码允许合作方最大cache存储时间(单位秒),超过该时间一定要到腾讯平台查询,不能使用cache里的号码对
 	private String userData;// 可选 字符串最大长度不超过128字节，该requestId在后面话单和录音URL推送中原样带回
 	private String record;// 可选 是否录音，0表示不录音，1表示录音。默认为不录音
@@ -23,6 +25,22 @@ public class SafetyCallModel extends BaseModel {
 	private String cityId;// 城市id
 	private String userId;
 	private String remark;
+
+	public String getCallerdisplay() {
+		return callerdisplay;
+	}
+
+	public void setCallerdisplay(String callerdisplay) {
+		this.callerdisplay = callerdisplay;
+	}
+
+	public String getCalleedisplay() {
+		return calleedisplay;
+	}
+
+	public void setCalleedisplay(String calleedisplay) {
+		this.calleedisplay = calleedisplay;
+	}
 
 	public String getBindId() {
 		return bindId;

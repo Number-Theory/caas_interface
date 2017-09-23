@@ -9,13 +9,22 @@ public class VoiceNotifyModel extends BaseModel {
 
 	private String caller; // 语音通知的被叫侧显示的号码
 	private String callee; // 被叫号码
-	private String type = "0"; // 内容类型：0：文本；1：模板
+	private String type = "1"; // 内容类型：0：文本；1：模板
 	private Integer playTimes = 1; //
 	private String templateId; // 模板ID,当type为1时必传
 	private String content;// 当type为0时：文本内容，平台负责将该内容转成语音，呼通指定号码后，播放该语音文件；当type为1时：表示模板参数值,形式为json格式
 	private String billUrl; // 话单推送url
 	private String statusUrl; // 状态推送Url
 	private String userData; // 用户自定义透传字段，128字节大小
+	private String userId;
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 
 	public String getCaller() {
 		return caller;

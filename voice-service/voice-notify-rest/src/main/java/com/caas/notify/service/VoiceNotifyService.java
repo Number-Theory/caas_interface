@@ -1,5 +1,21 @@
 package com.caas.notify.service;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.caas.dao.CaasDao;
 import com.caas.model.AuthModel;
 import com.caas.model.Voice4ZHModel;
 import com.caas.model.VoiceNotifyModel;
@@ -11,25 +27,16 @@ import com.yzx.access.client.HttpClient1;
 import com.yzx.access.util.HttpUtils;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
+import com.yzx.core.util.GenericTokenParserUtil;
+import com.yzx.core.util.GenericTokenParserUtil.TokenHandler;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.core.util.Log4jUtils;
 import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.UUID;
+import com.yzx.redis.RedisKeyConsts;
+import com.yzx.redis.RedisOpClient;
 
 /**
  * 语音通知
@@ -41,6 +48,9 @@ import java.util.UUID;
 public class VoiceNotifyService extends DefaultServiceCallBack {
 
 	private static final Logger logger = LogManager.getLogger(VoiceNotifyService.class);
+
+	@Autowired
+	private CaasDao dao;
 
 	@Override
 	public void callService(ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response, Map<String, Object> paramsObject) {
@@ -61,6 +71,8 @@ public class VoiceNotifyService extends DefaultServiceCallBack {
 
 		VoiceNotifyModel voiceNotifyModel = JsonUtil.fromJson(request.getRequestString(), new TypeToken<VoiceNotifyModel>() {
 		}.getType());
+		
+		voiceNotifyModel.setUserId(userId);
 
 		String userData = voiceNotifyModel.getUserData();
 		String caller = voiceNotifyModel.getCaller();
@@ -160,20 +172,38 @@ public class VoiceNotifyService extends DefaultServiceCallBack {
 
 						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/voiceNotify4ZH";
 						Voice4ZHModel vc = new Voice4ZHModel();
+
 						vc.setAppid(ConfigUtils.getProperty("voiceCode_zh_appid", String.class));
 						vc.setCalled(voiceNotifyModel.getCallee());
 						vc.setCalling(voiceNotifyModel.getCaller());
-						// TODO
-						// vc.setExtkey2(voiceNotifyModel.getContent());
+						Map<String, Object> sqlParams = new HashMap<String, Object>();
+						sqlParams.put("id", voiceNotifyModel.getTemplateId());
+						sqlParams.put("userId", userId);
+						String templateContent = dao.selectOne("common.getTemplateContent", sqlParams);
+						Map<String, Object> contentParams = JsonUtil.jsonStrToMap(content);
+						GenericTokenParserUtil parser = new GenericTokenParserUtil("{", "}", new TokenHandler() {
+							@Override
+							public String handleToken(String content) {
+								return String.valueOf(contentParams.get(content));
+							}
+						});
+						templateContent = parser.parse(templateContent);
+						vc.setExtkey2(templateContent);
 						vc.setExtparam(callId);
 						vc.setRepeat(String.valueOf(voiceNotifyModel.getPlayTimes()));
+						vc.setServiceid(ConfigUtils.getProperty("voiceNotify_serviceId", String.class));
+						vc.setTid(ConfigUtils.getProperty("voiceNotify_tid", String.class));
 						vc.setUrl(ConfigUtils.getProperty("voiceNotify_callback_url", String.class));
+						
+						RedisOpClient.set(RedisKeyConsts.getKey(RedisKeyConsts.VOICE_NOTIFY_SESSION, callId), JsonUtil.toJsonStr(voiceNotifyModel));
 
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
 								public void execute(HttpResponse response, String context) {
-
+									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
+									}.getType());
+									HttpUtils.sendMessageJson(ctx, controlResponse.toString());
 								}
 
 								@Override

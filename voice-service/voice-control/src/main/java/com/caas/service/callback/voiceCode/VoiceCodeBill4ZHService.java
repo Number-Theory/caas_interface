@@ -120,7 +120,6 @@ public class VoiceCodeBill4ZHService extends DefaultServiceCallBack {
 		} else {
 			logger.info("回调地址为空，不进行回调！");
 		}
-		// TODO 处理业务
 
 		HttpUtils.sendMessageXml(ctx, XMLUtil.convertToXml(new XmlCallBackModel()));
 	}

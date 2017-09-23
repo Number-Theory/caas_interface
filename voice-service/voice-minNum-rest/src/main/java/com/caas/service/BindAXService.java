@@ -115,8 +115,8 @@ public class BindAXService extends DefaultServiceCallBack {
 			minNumModel.setRecord(record);
 		}
 
-		if (StringUtil.isBlank(minNumModel.getCalldisplay()) || !"0".equals(minNumModel.getCalldisplay())) {
-			minNumModel.setCalldisplay("1");
+		if (StringUtil.isBlank(minNumModel.getCalldisplay()) || !"1".equals(minNumModel.getCalldisplay())) {
+			minNumModel.setCalldisplay("0");
 		}
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();

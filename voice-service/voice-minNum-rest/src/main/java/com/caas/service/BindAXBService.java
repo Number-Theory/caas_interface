@@ -131,6 +131,17 @@ public class BindAXBService extends DefaultServiceCallBack {
 			safetyCallModel.setRecord(record);
 		}
 
+		String callerDisplay = safetyCallModel.getCallerdisplay();
+		String calleeDisplay = safetyCallModel.getCalleedisplay();
+		if (!"1".equals(callerDisplay)) {
+			callerDisplay = "0";
+			safetyCallModel.setCallerdisplay(callerDisplay);
+		}
+		if (!"1".equals(calleeDisplay)) {
+			calleeDisplay = "0";
+			safetyCallModel.setCalleedisplay(calleeDisplay);
+		}
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("phoneNumber", dstVirtualNum);
 		paramMap.put("userId", userId);
@@ -184,11 +195,12 @@ public class BindAXBService extends DefaultServiceCallBack {
 						SimpleDateFormat sdDateFormat1 = new SimpleDateFormat("yyyyMMddHHmmssFFF");
 						gxInfo.setSubts(sdDateFormat1.format(new Date()));
 						gxInfo.setAnucode("206,207,208");
+						gxInfo.setCalldisplay(safetyCallModel.getCallerdisplay() + "," + safetyCallModel.getCalleedisplay());
 						gxInfo.setExpiration(safetyCallModel.getMaxAge());
 						gxInfo.setCallrecording(safetyCallModel.getRecord());
 						final String[] subid = { "" };
 						final String[] orderRecordKeyOld = { "" };
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindAXB"; // TODO
+						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindAXB";
 						if (callerBindIdMapOld != null && !callerBindIdMapOld.isEmpty()) {// 如果选取的主叫和中间号存在绑定关系，绑定更新接口
 
 							String bindIdOld = callerBindIdMapOld.get("bindId");
@@ -258,6 +270,8 @@ public class BindAXBService extends DefaultServiceCallBack {
 										orderRecordMap.put("maxAge", safetyCallModel.getMaxAge());
 										orderRecordMap.put("requestId", callId);
 										orderRecordMap.put("record", safetyCallModel.getRecord());
+										orderRecordMap.put("callerDisplay", safetyCallModel.getCallerdisplay());
+										orderRecordMap.put("calleeDisplay", safetyCallModel.getCalleedisplay());
 										Map<String, Object> sqlParams = new HashMap<String, Object>();
 										sqlParams.put("userId", userId);
 										sqlParams.put("productType", "0");

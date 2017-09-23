@@ -95,7 +95,11 @@
 	</select>
 	
 	<select id="getNumberCityId" resultType="string">
-		select cityCode from tb_caas_phoneNumber t where t.phoneNumber=#{phoneNumber} limit 1
+		select cityCode from tb_caas_phonenumber t where t.phoneNumber=#{phoneNumber} limit 1
+	</select>
+	
+	<select id="getTemplateContent" resultType="string">
+		select templateContent from tb_caas_template t where t.id=#{id} and t.userId=#{userId} and t.status='0'
 	</select>
 	
 </mapper>

@@ -50,6 +50,7 @@ public class SafetyCallBindAXBService extends DefaultServiceCallBack {
 		param.put("expiration", gxInfo.getExpiration());
 		Map<String, Object> extraMap = new HashMap<String, Object>();
 		extraMap.put("callrecording", gxInfo.getCallrecording());
+		extraMap.put("calldisplay", gxInfo.getCalldisplay());
 		param.put("extra", extraMap);
 
 		String body = JsonUtil.toJsonStr(param);
