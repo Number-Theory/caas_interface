@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service id="{version}/caas/unbindax/{userId}" displayName="AX解绑接口"
+<service id="{version}/voice/ax/relieve/{userId}" displayName="AX解绑接口"
 	activator="com.caas.service.UnBindAXService" isAsync="true" />

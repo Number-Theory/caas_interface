@@ -13,8 +13,7 @@ public class VoiceNotifyModel extends BaseModel {
 	private Integer playTimes = 1; //
 	private String templateId; // 模板ID,当type为1时必传
 	private String content;// 当type为0时：文本内容，平台负责将该内容转成语音，呼通指定号码后，播放该语音文件；当type为1时：表示模板参数值,形式为json格式
-	private String billUrl; // 话单推送url
-	private String statusUrl; // 状态推送Url
+	private String hangupUrl; // 话单推送url
 	private String userData; // 用户自定义透传字段，128字节大小
 	private String userId;
 
@@ -74,20 +73,12 @@ public class VoiceNotifyModel extends BaseModel {
 		this.content = content;
 	}
 
-	public String getBillUrl() {
-		return billUrl;
+	public String getHangupUrl() {
+		return hangupUrl;
 	}
 
-	public void setBillUrl(String billUrl) {
-		this.billUrl = billUrl;
-	}
-
-	public String getStatusUrl() {
-		return statusUrl;
-	}
-
-	public void setStatusUrl(String statusUrl) {
-		this.statusUrl = statusUrl;
+	public void setHangupUrl(String hangupUrl) {
+		this.hangupUrl = hangupUrl;
 	}
 
 	public String getUserData() {

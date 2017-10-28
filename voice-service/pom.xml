@@ -85,5 +85,6 @@
 		<module>voice-callback</module>
     <module>voice-minNum-rest</module>
     <module>voice-code-rest</module>
+    <module>voice-clickcall-rest</module>
   </modules>
 </project>

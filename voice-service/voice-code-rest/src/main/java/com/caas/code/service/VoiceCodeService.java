@@ -70,7 +70,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 		String userData = voiceCodeModel.getUserData();
 		String caller = voiceCodeModel.getCaller();
 		String callee = voiceCodeModel.getCallee();
-		String captchaCode = voiceCodeModel.getCaptchaCode();
+		String captchaCode = voiceCodeModel.getContent();
 		Integer playTimes = voiceCodeModel.getPlayTimes();
 
 		if (StringUtil.isNotEmpty(userData) && userData.length() > 128) {
@@ -109,8 +109,8 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 		if (null == playTimes || 0 == playTimes) {
 			playTimes = 1;
 		} else {
-			if (playTimes > 4) {
-				playTimes = 4;
+			if (playTimes > 3) {
+				playTimes = 3;
 			}
 			if (playTimes < 1) {
 				playTimes = 1;
@@ -124,7 +124,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 			return;
 		}
 
-		if (captchaCode.length() > 6 || captchaCode.length() < 4) {
+		if (captchaCode.length() != 6 || captchaCode.length() != 4) {
 			HttpUtils.sendMessageJson(ctx, response.toString());
 			setResponse(callId, response, BusiErrorCode.B_100033, REST_EVENT, userData);
 			return;
@@ -167,7 +167,7 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 						vc.setAppid(ConfigUtils.getProperty("voiceCode_zh_appid", String.class));
 						vc.setCalled(voiceCodeModel.getCallee());
 						vc.setCalling(voiceCodeModel.getCaller());
-						vc.setExtkey(voiceCodeModel.getCaptchaCode());
+						vc.setExtkey(voiceCodeModel.getContent());
 						vc.setExtparam(callId);
 						vc.setRepeat(String.valueOf(voiceCodeModel.getPlayTimes()));
 						vc.setUrl(ConfigUtils.getProperty("voiceCode_callback_url", String.class));

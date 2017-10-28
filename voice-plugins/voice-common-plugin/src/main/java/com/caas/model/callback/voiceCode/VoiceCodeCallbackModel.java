@@ -17,10 +17,19 @@ public class VoiceCodeCallbackModel extends BaseModel {
 	private String callId;
 	private String caller;
 	private String callee;
-	private String startTime;
+	private String beginTime;
 	private String endTime;
-	private String status;
+	private String callStatus;
 	private String userId;
+	private String userData;
+
+	public String getUserData() {
+		return userData;
+	}
+
+	public void setUserData(String userData) {
+		this.userData = userData;
+	}
 
 	public String getCallId() {
 		return callId;
@@ -46,12 +55,12 @@ public class VoiceCodeCallbackModel extends BaseModel {
 		this.callee = callee;
 	}
 
-	public String getStartTime() {
-		return startTime;
+	public String getBeginTime() {
+		return beginTime;
 	}
 
-	public void setStartTime(String startTime) {
-		this.startTime = startTime;
+	public void setBeginTime(String beginTime) {
+		this.beginTime = beginTime;
 	}
 
 	public String getEndTime() {
@@ -62,12 +71,12 @@ public class VoiceCodeCallbackModel extends BaseModel {
 		this.endTime = endTime;
 	}
 
-	public String getStatus() {
-		return status;
+	public String getCallStatus() {
+		return callStatus;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setCallStatus(String callStatus) {
+		this.callStatus = callStatus;
 	}
 
 	public String getUserId() {

@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service id="control/callInAXB" displayName="东信AXB状态回调接口"
-	activator="com.caas.service.callback.minNum.CallInAXBService" />
+<service id="control/callInAXB/v2/axb/callin" displayName="东信AXB状态回调接口"
+	activator="com.caas.service.callback.safetyCall.CallInAXBService" />

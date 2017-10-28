@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -31,7 +32,8 @@ public class HttpClient {
 	public HttpClient(ClientHandler clientHandler) {
 		this.clientHandler = clientHandler;
 		b = new Bootstrap();
-		b.group(DefaultEventLoopGroup.get().getBossGroupForClient()).channel(NioSocketChannel.class).handler(new NettyClientInitializer(this.clientHandler));
+		b.group(DefaultEventLoopGroup.get().getBossGroupForClient()).channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+				.handler(new NettyClientInitializer(this.clientHandler));
 	}
 
 	Bootstrap b = null;
@@ -54,7 +56,7 @@ public class HttpClient {
 		request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
 		request.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes());
 		request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json;charset=utf-8");
-		
+
 		// 发送http请求
 		f.channel().write(request);
 		f.channel().flush();

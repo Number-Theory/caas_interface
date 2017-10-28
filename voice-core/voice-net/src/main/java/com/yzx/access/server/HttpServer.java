@@ -1,6 +1,7 @@
 package com.yzx.access.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -44,12 +45,12 @@ public class HttpServer {
 
 	public void start(ServerHandler handler) throws Exception {
 		bossGroupForServer = new NioEventLoopGroup(ConfigUtils.getProperty("Netty.thread.BOSS线程数", 1, Integer.class));
-		workerGroupForServer = new NioEventLoopGroup(ConfigUtils.getProperty("Netty.thread.IO线程数", Runtime.getRuntime()
-				.availableProcessors() * 2, Integer.class));
+		workerGroupForServer = new NioEventLoopGroup(ConfigUtils.getProperty("Netty.thread.IO线程数", Runtime.getRuntime().availableProcessors() * 2,
+				Integer.class));
 
 		ServerBootstrap bootstrap = new ServerBootstrap();
 		bootstrap.group(this.bossGroupForServer, this.workerGroupForServer).channel(NioServerSocketChannel.class)
-				.childHandler(new NettyServerInitializer(handler));
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000).childHandler(new NettyServerInitializer(handler));
 
 		bootstrap.bind(port).sync();
 	}

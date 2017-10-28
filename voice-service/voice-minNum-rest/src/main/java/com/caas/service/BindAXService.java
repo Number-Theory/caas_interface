@@ -214,6 +214,8 @@ public class BindAXService extends DefaultServiceCallBack {
 										orderRecordMap.put("maxAge", minNumModel.getMaxAge());
 										orderRecordMap.put("requestId", callId);
 										orderRecordMap.put("record", minNumModel.getRecord());
+										orderRecordMap.put("callerDisplay", minNumModel.getCalldisplay());
+										orderRecordMap.put("bindStatus", "0");
 										Map<String, Object> sqlParams = new HashMap<String, Object>();
 										sqlParams.put("userId", userId);
 										sqlParams.put("productType", "0");
@@ -236,6 +238,7 @@ public class BindAXService extends DefaultServiceCallBack {
 										orderRecordMap.put("cityId", minNumModel.getCityId());
 										orderRecordMap.put("productType", "1");
 										orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("data")).get("subid")));
+										orderRecordMap.put("userData", ObjectUtils.defaultIfNull(minNumModel.getUserData(), ""));
 										String orderRes = RedisOpClient.hmset(orderRecordKey, orderRecordMap, Integer.valueOf(minNumModel.getMaxAge()));
 										logger.info("【AX号码绑定】订单记录哈希表插入订单记录orderRes={},orderRecordKey={},orderRecordMap={},maxAge={}", orderRes, orderRecordKey,
 												orderRecordMap, Integer.valueOf(minNumModel.getMaxAge()));

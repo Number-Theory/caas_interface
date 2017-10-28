@@ -43,7 +43,6 @@ public class AuthService extends DefaultServiceCallBack {
 		}.getType());
 
 		String auth = authBean.getAuth();
-		String sig = authBean.getSig();
 		String userId = authBean.getUserID();
 		EncryptUtil encryptUtil = new EncryptUtil();
 		if (StringUtil.isEmpty(auth)) {
@@ -65,7 +64,7 @@ public class AuthService extends DefaultServiceCallBack {
 			return;
 		}
 		if (StringUtil.isEmpty(auths[0])) {
-			logger.warn("主账号[" + userId + "]Authorization参数解码后账户ID为空");
+			logger.warn("主账号[" + userId + "]Authorization参数解码后Token为空");
 			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100011, AUTH_EVENT, authBean.getUserData());
 			return;
 		}
@@ -74,24 +73,9 @@ public class AuthService extends DefaultServiceCallBack {
 			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100012, AUTH_EVENT, authBean.getUserData());
 			return;
 		}
-		if (auths[0].length() != 32) {
-			logger.warn("主账号[" + userId + "]Authorization参数解码后格式有误");
-			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100013, AUTH_EVENT, authBean.getUserData());
-			return;
-		}
 		if (StringUtils.isBlank(userId)) {
 			logger.warn("主账户ID为空！");
 			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100001, AUTH_EVENT, authBean.getUserData());
-			return;
-		}
-		if (!auths[0].equals(userId)) {
-			logger.warn("主账号[" + userId + "]Authorization参数中账户ID跟请求地址中的账户ID不一致");
-			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100014, AUTH_EVENT, authBean.getUserData());
-			return;
-		}
-		if (StringUtil.isEmpty(sig)) {
-			logger.warn("主账号[" + userId + "]Sig参数为空");
-			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100015, AUTH_EVENT, authBean.getUserData());
 			return;
 		}
 
@@ -136,17 +120,14 @@ public class AuthService extends DefaultServiceCallBack {
 			logger.warn("主账户Token为空！");
 			return;
 		}
+		
 		String token = (String) userInfo.get("token");
-
-		String md5 = "";
-		try {
-			md5 = encryptUtil.md5Digest(auths[0] + token + auths[1]);
-		} catch (Exception e) {
-			logger.error(e);
-		}
-		if (!md5.toUpperCase().equals(sig.toUpperCase())) {
-			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100005, AUTH_EVENT, authBean.getUserData());
-			logger.warn("主账号[" + auths[0] + "]Sig校验失败");
+		
+		
+		if(!token.toUpperCase().equals(auths[0].toUpperCase())) {
+			logger.warn("主账号[" + userId + "]Authorization参数中账户token不正确");
+			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100015, AUTH_EVENT, authBean.getUserData());
+			return;
 		}
 
 		// 应用验证：业务是否存在、可用

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -97,6 +98,8 @@ public class HttpUtilsForGx {
 			requestBody.setContent(new ByteArrayInputStream(data.getBytes("UTF-8")));
 			requestBody.setContentLength(data.getBytes("UTF-8").length);
 			httppost.setEntity(requestBody);
+
+			printInBoundMessage(httppost, data);
 			// 执行客户端请求
 			HttpResponse response = httpclient.execute(httppost);
 
@@ -111,6 +114,27 @@ public class HttpUtilsForGx {
 			logger.info("【发送post请求JSON】失败： result=" + result, e);
 		}
 		return result;
+	}
+
+	private static void printInBoundMessage(HttpPost request, String requestString) {
+		StringBuffer info = new StringBuffer();
+		info.append(request.getURI()).append("\n");
+
+		info.append("Http-Method: ").append(request.getMethod()).append("\n");
+		info.append("Headers: [");
+		boolean flag = true;
+		for (Header header : request.getAllHeaders()) {
+			if (flag) {
+				info.append(header.getName()).append(":").append(header.getValue());
+			} else {
+				info.append(";").append(header.getName()).append(":").append(header.getValue());
+			}
+			flag = false;
+		}
+		info.append("]\n");
+
+		info.append("Payload: ").append(requestString).append("\n---------------------------");
+		System.out.println(info);
 	}
 
 	public static String putJson(String url, String data, String type) {
@@ -157,9 +181,11 @@ public class HttpUtilsForGx {
 			JSONObject object = JsonUtil.toJsonObj(extra);
 			String callrecording = (String) object.get("callrecording");
 			String calldisplay = (String) object.get("calldisplay");
+			String callrestrict = (String) object.get("callrestrict");
 			jsonObject.remove("extra");
 			jsonObject.put("callrecording", callrecording);
 			jsonObject.put("calldisplay", calldisplay);
+			jsonObject.put("callrestrict", callrestrict);
 			msgdgtMap = JsonUtil.jsonStrToMap(jsonObject.toString());
 		} else {
 			msgdgtMap = JsonUtil.jsonStrToMap(data);

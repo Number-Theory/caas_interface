@@ -30,10 +30,11 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		String userId = billingModel.getUserId();
 		String productType = billingModel.getProductType();
 		String caller = billingModel.getCaller();
+		String callee = billingModel.getCalled();
 
 		// 根据号码获取费率
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("phoneNumber", caller);
+		params.put("phoneNumber", callee);
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
 		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
@@ -53,7 +54,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		String callerCityB = NumberUtils.getMobileAttribution(billingModel.getCalled()), calledCityB = NumberUtils.getMobileAttribution(billingModel
 				.getRealityNumber());
 		Long callPrice = 0L, callPriceB = 0L, deductionUnit = 0L, deductionUnitB = 0L;
-		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit")) * 6L;
+		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
 		if ("0".equals(billingType)) { // A路B路分开计费
 			if ("0".equals(billingModel.getCallStatus())) { // A路
 				callTime = billingModel.getCallTime();
@@ -134,7 +135,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		Long gratisUnit = 0L;
 		if (flag) {
 			Map<String, Object> sqlParams = new HashMap<String, Object>();
-			sqlParams.put("phoneNumber", caller);
+			sqlParams.put("phoneNumber", callee);
 			sqlParams.put("productType", billingModel.getProductType());
 			sqlParams.put("userId", billingModel.getUserId());
 			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);

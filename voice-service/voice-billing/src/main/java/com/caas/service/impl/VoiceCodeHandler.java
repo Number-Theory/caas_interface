@@ -50,7 +50,7 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 		Long callTime = 0L, callTimeB = 0L, payMoney = 0L;
 		String callerCity = NumberUtils.getMobileAttribution(caller), calledCity = NumberUtils.getMobileAttribution(billingModel.getCalled());
 		Long callPrice = 0L, callPriceB = 0L, deductionUnit = 0L, deductionUnitB = 0L;
-		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit")) * 6L;
+		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
 		if ("0".equals(billingType)) { // A路B路分开计费
 			if ("0".equals(billingModel.getCallStatus())) { // A路
 				callTime = billingModel.getCallTime();

@@ -142,6 +142,12 @@ public class BindAXBService extends DefaultServiceCallBack {
 			safetyCallModel.setCalleedisplay(calleeDisplay);
 		}
 
+		String callRestrict = safetyCallModel.getCallRestrict();
+		if (!"0".equals(callRestrict) || !"2".equals(callRestrict) || !"3".equals(callRestrict)) {
+			callRestrict = "1";
+			safetyCallModel.setCallRestrict(callRestrict);
+		}
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("phoneNumber", dstVirtualNum);
 		paramMap.put("userId", userId);
@@ -192,12 +198,13 @@ public class BindAXBService extends DefaultServiceCallBack {
 						gxInfo.setRequestId(callId);
 						gxInfo.setTelA(safetyCallModel.getCaller());
 						gxInfo.setTelB(safetyCallModel.getCallee());
-						SimpleDateFormat sdDateFormat1 = new SimpleDateFormat("yyyyMMddHHmmssFFF");
+						SimpleDateFormat sdDateFormat1 = new SimpleDateFormat("yyyyMMddHHmmss");
 						gxInfo.setSubts(sdDateFormat1.format(new Date()));
 						gxInfo.setAnucode("206,207,208");
 						gxInfo.setCalldisplay(safetyCallModel.getCallerdisplay() + "," + safetyCallModel.getCalleedisplay());
 						gxInfo.setExpiration(safetyCallModel.getMaxAge());
 						gxInfo.setCallrecording(safetyCallModel.getRecord());
+						gxInfo.setCallrestrict(safetyCallModel.getCallRestrict());
 						final String[] subid = { "" };
 						final String[] orderRecordKeyOld = { "" };
 						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindAXB";
@@ -270,6 +277,7 @@ public class BindAXBService extends DefaultServiceCallBack {
 										orderRecordMap.put("maxAge", safetyCallModel.getMaxAge());
 										orderRecordMap.put("requestId", callId);
 										orderRecordMap.put("record", safetyCallModel.getRecord());
+										orderRecordMap.put("bindStatus", "0");
 										orderRecordMap.put("callerDisplay", safetyCallModel.getCallerdisplay());
 										orderRecordMap.put("calleeDisplay", safetyCallModel.getCalleedisplay());
 										Map<String, Object> sqlParams = new HashMap<String, Object>();
@@ -298,6 +306,8 @@ public class BindAXBService extends DefaultServiceCallBack {
 										} else { // 绑定更新
 											orderRecordMap.put("subid", subid[0]);
 										}
+										orderRecordMap.put("callRestrict", safetyCallModel.getCallRestrict());
+										orderRecordMap.put("userData", ObjectUtils.defaultIfNull(safetyCallModel.getUserData(), ""));
 										String orderRes = RedisOpClient.hmset(orderRecordKey, orderRecordMap, Integer.valueOf(safetyCallModel.getMaxAge()));
 										logger.info("【AXB号码绑定】订单记录哈希表插入订单记录orderRes={},orderRecordKey={},orderRecordMap={},maxAge={}", orderRes,
 												orderRecordKey, orderRecordMap, Integer.valueOf(safetyCallModel.getMaxAge()));

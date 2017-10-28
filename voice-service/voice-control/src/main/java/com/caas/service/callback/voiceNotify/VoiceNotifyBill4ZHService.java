@@ -51,61 +51,64 @@ public class VoiceNotifyBill4ZHService extends DefaultServiceCallBack {
 		VoiceNotifyModel voiceNotifyModel = JsonUtil.fromJson(voiceNotifyModelString, new TypeToken<VoiceNotifyModel>() {
 		}.getType());
 
+		BillingModel billingModel = new BillingModel();
+		billingModel.setBeginTime(bill.getStarttime());
+		billingModel.setCalled(bill.getCalled());
+		billingModel.setCalledDisplay(bill.getCaller());
+		billingModel.setCaller(bill.getCaller());
+		billingModel.setCallID(callId);
+		if ("2".equals(bill.getStatus())) {
+			billingModel.setCallStatus("0");
+		} else {
+			billingModel.setCallStatus("1");
+		}
+		Long callTime = 0L;
+		try {
+			callTime = DateUtil.getTime(bill.getEndtime(), "yyyy-MM-dd HH:mm:ss") - DateUtil.getTime(bill.getStarttime(), "yyyy-MM-dd HH:mm:ss");
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		billingModel.setCallTime(callTime);
+		billingModel.setEndTime(bill.getEndtime());
+		billingModel.setEvent("3");
+		billingModel.setProductType("3");
+		billingModel.setRealityNumber(voiceNotifyModel.getCaller());
+		billingModel.setRecordType("1");
+		billingModel.setRecordUrl("");
+		billingModel.setUserId(voiceNotifyModel.getUserId());
+		String billingUrl = ConfigUtils.getProperty("billingUrl", String.class);
+
+		try {
+			com.yzx.access.client.HttpUtils.httpConnectionPost(billingUrl, JsonUtil.toJsonStr(billingModel));
+			logger.info("话单扣費成功：{}", JsonUtil.toJsonStr(billingModel));
+		} catch (Exception e) {
+			logger.error("话单扣费失败：{}", JsonUtil.toJsonStr(billingModel), e);
+		}
+
 		String billUrl = "";
-		if (StringUtil.isBlank(voiceNotifyModel.getBillUrl())) {
+		if (StringUtil.isBlank(voiceNotifyModel.getHangupUrl())) {
 			Map<String, Object> sqlParams = new HashMap<String, Object>();
 			sqlParams.put("userId", voiceNotifyModel.getUserId());
 			sqlParams.put("productType", "4");
 			billUrl = dao.selectOne("common.getAppBillUrl", sqlParams);
 		} else {
-			billUrl = voiceNotifyModel.getBillUrl();
+			billUrl = voiceNotifyModel.getHangupUrl();
 		}
-		if (StringUtil.isNotEmpty(billUrl)) { // 开始对接billing扣费、回调
-			BillingModel billingModel = new BillingModel();
-			billingModel.setBeginTime(bill.getStarttime());
-			billingModel.setCalled(bill.getCalled());
-			billingModel.setCalledDisplay(bill.getCaller());
-			billingModel.setCaller(bill.getCaller());
-			billingModel.setCallID(callId);
-			if ("2".equals(bill.getStatus())) {
-				billingModel.setCallStatus("0");
-			} else {
-				billingModel.setCallStatus("1");
-			}
-			Long callTime = 0L;
-			try {
-				callTime = DateUtil.getTime(bill.getEndtime(), "yyyy-MM-dd HH:mm:ss") - DateUtil.getTime(bill.getStarttime(), "yyyy-MM-dd HH:mm:ss");
-			} catch (ParseException e1) {
-				e1.printStackTrace();
-			}
-			billingModel.setCallTime(callTime);
-			billingModel.setEndTime(bill.getEndtime());
-			billingModel.setEvent("3");
-			billingModel.setProductType("3");
-			billingModel.setRealityNumber(voiceNotifyModel.getCaller());
-			billingModel.setRecordType("1");
-			billingModel.setRecordUrl("");
-			billingModel.setUserId(voiceNotifyModel.getUserId());
-			String billingUrl = ConfigUtils.getProperty("billingUrl", String.class);
-
-			try {
-				com.yzx.access.client.HttpUtils.httpConnectionPost(billingUrl, JsonUtil.toJsonStr(billingModel));
-				logger.info("话单扣費成功：{}", JsonUtil.toJsonStr(billingModel));
-			} catch (Exception e) {
-				logger.error("话单扣费失败：{}", JsonUtil.toJsonStr(billingModel), e);
-			}
-
+		if (StringUtil.isNotEmpty(billUrl)) { // 开始回调
 			logger.info("话单回调地址billUrl={}，开始进行回调...", billUrl);
 			VoiceCodeCallbackModel voiceCodeCallbackModel = new VoiceCodeCallbackModel();
 			voiceCodeCallbackModel.setCallee(bill.getCalled());
 			voiceCodeCallbackModel.setCaller(bill.getCaller());
 			voiceCodeCallbackModel.setCallId(callId);
 			voiceCodeCallbackModel.setEndTime(bill.getEndtime());
-			voiceCodeCallbackModel.setStartTime(bill.getStarttime());
+			voiceCodeCallbackModel.setBeginTime(bill.getStarttime());
+			voiceCodeCallbackModel.setUserData(voiceNotifyModel.getUserData());
 			if ("2".equals(bill.getStatus())) {
-				voiceCodeCallbackModel.setStatus("0");
+				voiceCodeCallbackModel.setCallStatus("0");
+			} else if ("3".equals(bill.getStatus())) {
+				voiceCodeCallbackModel.setCallStatus("1");
 			} else {
-				voiceCodeCallbackModel.setStatus("1");
+				voiceCodeCallbackModel.setCallStatus("2");
 			}
 			voiceCodeCallbackModel.setUserId(voiceNotifyModel.getUserId());
 

@@ -31,6 +31,15 @@ public class GxInfo extends BaseModel {
 	private String xmode;
 	private String calldisplay;
 	private String portType;
+	private String callrestrict = "1";
+
+	public String getCallrestrict() {
+		return callrestrict;
+	}
+
+	public void setCallrestrict(String callrestrict) {
+		this.callrestrict = callrestrict;
+	}
 
 	public String getXmode() {
 		return xmode;

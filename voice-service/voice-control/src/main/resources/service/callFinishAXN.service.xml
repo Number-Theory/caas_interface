@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/callFinishAXN/v2/axn/finish" displayName="东信AXN话单回调接口"
+	activator="com.caas.service.callback.safetyCall.CallFinishAXBService" />

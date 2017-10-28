@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service id="{version}/caas/voiceCode/{userId}" displayName="语音验证码接口"
+<service id="{version}/voice/code/{userId}" displayName="语音验证码接口"
 	activator="com.caas.code.service.VoiceCodeService" isAsync="true" />

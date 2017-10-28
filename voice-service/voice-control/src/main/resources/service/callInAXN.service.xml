@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/callInAXN/v2/axn/callin" displayName="东信AXN状态回调接口"
+	activator="com.caas.service.callback.safetyCall.CallInAXBService" />

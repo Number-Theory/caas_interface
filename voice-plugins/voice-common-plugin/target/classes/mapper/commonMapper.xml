@@ -69,17 +69,29 @@
 	</insert>
 	
 	<insert id="insertBindOrder">
-		INSERT INTO `tb_caas_bind_order` (`userId`, `bindId`, `caller`, `dstVirtualNum`, `callee`, `maxAge`, `requestId`,
-		 `record`, `statusUrl`, `hangupUrl`, `recordUrl`, `cityId`, `productType`, `subid`, `createDate`) VALUES 
-		 (#{userId}, #{bindId}, #{caller}, #{dstVirtualNum}, #{callee}, #{maxAge}, #{requestId},
-		 #{record}, #{statusUrl}, #{hangupUrl}, #{recordUrl}, #{cityId}, #{productType}, #{subid}, now());
+		INSERT INTO `tb_caas_bind_order` (`userId`, `bindId`, `caller`, `dstVirtualNum`, `callee`, `maxAge`, `requestId`,`callerDisplay`, `calleeDisplay`,
+		 `record`, `statusUrl`, `hangupUrl`, `recordUrl`, `cityId`, `productType`, bindStatus, `subid`, `callRestrict`, `userData`, `createDate`) VALUES 
+		 (#{userId}, #{bindId}, #{caller}, #{dstVirtualNum}, #{callee}, #{maxAge}, #{requestId},#{callerDisplay}, #{calleeDisplay},
+		 #{record}, #{statusUrl}, #{hangupUrl}, #{recordUrl}, #{cityId}, #{productType}, #{bindStatus}, #{subid}, #{callRestrict}, #{userData}, now());
 	</insert>
+	
+	<select id="getAllBindByDstVirtaulNum" resultType="map">
+		select bindId,caller,callee,dstVirtualNum,maxAge,record,callerDisplay,calleeDisplay,createDate as bindTime,callRestrict from tb_caas_bind_order t where t.dstVirtualNum=#{dstVirtualNum}
+		and t.userId=#{userId} and t.bindStatus='0' and DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() 
+	</select>
+	
+	<update id="updateBindStatus">
+		update tb_caas_bind_order set status = '1' where bindId = #{bindId}
+	</update>
 	
 	<select id="getBindOrderStatusUrl" resultType="string">
 		select statusUrl from tb_caas_bind_order t where t.subid = #{subid}
 	</select>
 	<select id="getBindOrderBillUrl" resultType="string">
 		select hangupUrl from tb_caas_bind_order t where t.subid = #{subid}
+	</select>
+	<select id="getBindOrderRecordUrl" resultType="string">
+		select recordUrl from tb_caas_bind_order t where t.subid = #{subid}
 	</select>
 	
 	<select id="getBindOrder" resultType="map">

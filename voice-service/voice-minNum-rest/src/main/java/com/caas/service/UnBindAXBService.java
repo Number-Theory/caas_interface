@@ -4,13 +4,16 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.caas.dao.CaasDao;
 import com.caas.model.AuthModel;
 import com.caas.model.GxInfo;
 import com.caas.model.SafetyCallModel;
@@ -38,6 +41,9 @@ import com.yzx.redis.RedisOpClient;
 @Service
 public class UnBindAXBService extends DefaultServiceCallBack {
 	private static final Logger logger = LogManager.getLogger(UnBindAXBService.class);
+
+	@Autowired
+	private CaasDao dao;
 
 	@Override
 	public void callService(ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response, Map<String, Object> paramsObject) {
@@ -135,7 +141,9 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 										RedisOpClient.delKey(orderRecordKey);
 										logger.info("【AXB号码解绑】删除订单关系orderRecordKey={}", orderRecordKey);
 
-										// TODO 订单状态更新
+										Map<String, Object> sqlParams = new HashMap<String, Object>();
+										sqlParams.put("bindId", safetyCallModel.getBindId());
+										dao.update("common.updateBindStatus", sqlParams);
 
 										controlResponse.getOtherMap().put("bindId", safetyCallModel.getBindId());
 										controlResponse.getOtherMap().put("userData", safetyCallModel.getUserData());

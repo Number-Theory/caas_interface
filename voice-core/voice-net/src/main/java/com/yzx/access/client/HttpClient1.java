@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -30,10 +31,10 @@ public class HttpClient1 {
 	public HttpClient1(ClientHandler clientHandler) {
 		this.clientHandler = clientHandler;
 		b = new Bootstrap();
-		b.group(DefaultEventLoopGroup.get().getBossGroupForClient()).channel(NioSocketChannel.class)
+		b.group(DefaultEventLoopGroup.get().getBossGroupForClient()).channel(NioSocketChannel.class).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
 				.handler(new NettyClientInitializer(this.clientHandler));
-//		b.group(bossGroupForClient).channel(NioSocketChannel.class)
-//				.handler(new NettyClientInitializer(this.clientHandler));
+		// b.group(bossGroupForClient).channel(NioSocketChannel.class)
+		// .handler(new NettyClientInitializer(this.clientHandler));
 	}
 
 	Bootstrap b = null;
@@ -42,33 +43,34 @@ public class HttpClient1 {
 
 	}
 
-	public ChannelFuture httpPost(String url, String body) throws InterruptedException,
-			URISyntaxException, UnsupportedEncodingException {
-		URI uri = new URI(url); 
+	public ChannelFuture httpPost(String url, String body) throws InterruptedException, URISyntaxException, UnsupportedEncodingException {
+		URI uri = new URI(url);
 		ChannelFuture f = b.connect(uri.getHost(), uri.getPort() == -1 ? 80 : uri.getPort()).sync();
-		
-		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
-				uri.getPath().toString(), Unpooled.wrappedBuffer(body.getBytes("UTF-8")));
+
+		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, uri.getPath().toString(),
+				Unpooled.wrappedBuffer(body.getBytes("UTF-8")));
 
 		// 构建http请求
 		request.headers().set(HttpHeaderNames.HOST, uri.getHost());
 		request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
 		request.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes());
-		request.headers().set(HttpHeaderNames.CONTENT_TYPE,"application/json;charset=utf-8");
+		request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json;charset=utf-8");
 		// 发送http请求
 		f.channel().write(request);
 		f.channel().flush();
 		f.channel().closeFuture().sync();
 		f.addListener(new ChannelFutureListener() {
-	        @Override
-	        public void operationComplete(ChannelFuture future) {
-	            future.channel().close();
-	        }
-	    });
+			@Override
+			public void operationComplete(ChannelFuture future) {
+				future.channel().close();
+			}
+		});
 		return f;
 	}
+
 	/**
 	 * 回调业务单独专用POST方法
+	 * 
 	 * @param url
 	 * @param body
 	 * @return
@@ -76,38 +78,35 @@ public class HttpClient1 {
 	 * @throws URISyntaxException
 	 * @throws UnsupportedEncodingException
 	 */
-	public ChannelFuture httpPostBack(String url, String body) throws InterruptedException,
-			URISyntaxException, UnsupportedEncodingException {
-		URI uri = new URI(url); 
+	public ChannelFuture httpPostBack(String url, String body) throws InterruptedException, URISyntaxException, UnsupportedEncodingException {
+		URI uri = new URI(url);
 		ChannelFuture f = b.connect(uri.getHost(), uri.getPort() == -1 ? 80 : uri.getPort()).sync();
-		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST,
-				uri.getPath().toString(), Unpooled.wrappedBuffer(body.getBytes("UTF-8")));
-		
+		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, uri.getPath().toString(),
+				Unpooled.wrappedBuffer(body.getBytes("UTF-8")));
+
 		// 构建http请求
 		request.headers().set(HttpHeaderNames.HOST, uri.getHost());
 		request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
 		request.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes());
-		request.headers().set(HttpHeaderNames.CONTENT_TYPE,"application/json;charset=utf-8");
+		request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json;charset=utf-8");
 		// 发送http请求
 		f.channel().write(request);
 		f.channel().flush();
 		f.channel().closeFuture().sync();
 		f.addListener(new ChannelFutureListener() {
-	        @Override
-	        public void operationComplete(ChannelFuture future) {
-	            future.channel().close();
-	        }
-	    });
-		
+			@Override
+			public void operationComplete(ChannelFuture future) {
+				future.channel().close();
+			}
+		});
+
 		return f;
 	}
 
-	public ChannelFuture httpGet(String url) throws InterruptedException,
-			URISyntaxException, UnsupportedEncodingException {
-		URI uri = new URI(url); 
+	public ChannelFuture httpGet(String url) throws InterruptedException, URISyntaxException, UnsupportedEncodingException {
+		URI uri = new URI(url);
 		ChannelFuture f = b.connect(uri.getHost(), uri.getPort() == -1 ? 80 : uri.getPort()).sync();
-		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
-				uri.toASCIIString());
+		DefaultFullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri.toASCIIString());
 
 		// 构建http请求
 		request.headers().set(HttpHeaderNames.HOST, uri.getHost());
@@ -118,11 +117,11 @@ public class HttpClient1 {
 		f.channel().flush();
 		f.channel().closeFuture().sync();
 		f.addListener(new ChannelFutureListener() {
-	        @Override
-	        public void operationComplete(ChannelFuture future) {
-	            future.channel().close();
-	        }
-	    });
+			@Override
+			public void operationComplete(ChannelFuture future) {
+				future.channel().close();
+			}
+		});
 		return f;
 	}
 
