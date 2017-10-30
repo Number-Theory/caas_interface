@@ -4,10 +4,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,10 @@ import org.springframework.stereotype.Service;
 
 import com.caas.dao.CaasDao;
 import com.caas.model.AuthModel;
-import com.caas.model.GxInfo;
 import com.caas.model.MinNumModel;
 import com.google.gson.reflect.TypeToken;
 import com.yzx.access.callback.ClientHandler;
 import com.yzx.access.client.HttpClient;
-import com.yzx.access.client.HttpClient1;
 import com.yzx.access.util.HttpUtils;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
@@ -102,70 +100,22 @@ public class UnBindAXService extends DefaultServiceCallBack {
 					ServiceResponse authResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
 					if (BusiErrorCode.B_000000.getErrCode().equals(authResponse.getResult())) {
-						// TODO
-						String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
-						Map<String, String> orderRecordMap = RedisOpClient.hgetall(orderRecordKey);
-						if (orderRecordMap == null || orderRecordMap.isEmpty()) {
+
+						String className = RedisOpClient.get(RedisKeyConsts.getKey("apiServer:", minNumModel.getBindId()));
+						if (StringUtils.isBlank(className)) {
 							setResponse(callId, response, BusiErrorCode.B_100027, REST_EVENT, minNumModel.getUserData());
 							HttpUtils.sendMessageJson(ctx, response.toString());
 							return;
 						}
-
-						String subid = orderRecordMap.get("subid");
-						String dstVirtualNum = orderRecordMap.get("dstVirtualNum");
-						final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, dstVirtualNum);
-						final GxInfo gxInfo = new GxInfo();
-						gxInfo.setSubid(subid);
-
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumUnbindAX"; // TODO
+						BaseAXService axService;
 						try {
-							new HttpClient1(new ClientHandler() {
-								@Override
-								public void execute(HttpResponse response, String context) {
-									Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
-									Log4jUtils.initLog4jContext(request.getLogId());
-									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
-									}.getType());
-									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
-											&& (resultMap != null && resultMap.containsKey("code") && "0".equals(String.valueOf(resultMap.get("code"))))) {
-
-										RedisOpClient.delKey(calleeNumBindKey);
-										logger.info("【AX号码解绑】删除绑定关系callerNumBindKey={}", calleeNumBindKey);
-
-										String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
-										RedisOpClient.delKey(orderRecordKey);
-										logger.info("【AX号码解绑】删除订单关系orderRecordKey={}", orderRecordKey);
-
-										Map<String, Object> sqlParams = new HashMap<String, Object>();
-										sqlParams.put("bindId", minNumModel.getBindId());
-										dao.update("common.updateBindStatus", sqlParams);
-
-										controlResponse.getOtherMap().put("bindId", minNumModel.getBindId());
-										controlResponse.getOtherMap().put("userData", minNumModel.getUserData());
-										HttpUtils.sendMessageJson(ctx, controlResponse.toString());
-
-									} else {
-										if (resultMap != null && resultMap.containsKey("code") && !"0".equals(String.valueOf(resultMap.get("code")))) {
-											setResponse(callId, controlResponse, BusiErrorCode.B_100028, REST_EVENT, minNumModel.getUserData());
-											logger.error("【AX号码解绑】号码解绑失败[{}].", resultMap);
-										}
-										HttpUtils.sendMessageJson(ctx, controlResponse.toString());
-									}
-								}
-
-								@Override
-								public void failed(Exception ex) {
-									Log4jUtils.initLog4jContext(request.getLogId());
-									logger.info("请求caas_control组件失败,ex={}", ex);
-									setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, minNumModel.getUserData());
-									HttpUtils.sendMessageJson(ctx, response.toString());
-								}
-							}).httpPost(controlUrl, JsonUtil.toJsonStr(gxInfo));
+							axService = (BaseAXService) Class.forName(className).newInstance();
 						} catch (Exception e) {
-							logger.info("请求caas_control组件出错,ex={}", e);
-							setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, minNumModel.getUserData());
+							setResponse(callId, response, BusiErrorCode.B_100027, REST_EVENT, minNumModel.getUserData());
 							HttpUtils.sendMessageJson(ctx, response.toString());
+							return;
 						}
+						axService.axUnbind(callId, minNumModel, ctx, request, response);
 
 					} else {
 						// 将鉴权的错误结果异步写回客户端

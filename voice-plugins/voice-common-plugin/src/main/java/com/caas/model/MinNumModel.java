@@ -21,15 +21,16 @@ public class MinNumModel extends BaseModel {
 	private String hangupUrl;// 可选 话单推送地址，不填推到默认协商地址
 	private String recordUrl;// 可选 录单URL回调通知地址，不填推到默认协商地址
 	private String cityId;// 城市id
+	private String userId;
 
 	// 新加的字段,标识AX模式是选号还是送号
 	private String virtualType;
 	// 新加的字段,标识AX模式的身份信息校验
-	private String name; //名称
+	private String name; // 名称
 	// 新加的字段，标识AX模式是否显号
 	private String calldisplay = "0"; // 来显控制 0：显示真实号码 1：显示 X 号码
-	private String cardtype; //证件类型
-	private String cardno; //证件号码
+	private String cardtype; // 证件类型
+	private String cardno; // 证件号码
 
 	public String getBindId() {
 		return bindId;
@@ -61,6 +62,14 @@ public class MinNumModel extends BaseModel {
 
 	public void setDstVirtualNum(String dstVirtualNum) {
 		this.dstVirtualNum = dstVirtualNum;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getCalleeDisplayNum() {
