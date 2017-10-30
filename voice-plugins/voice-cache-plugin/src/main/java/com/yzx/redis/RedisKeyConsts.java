@@ -17,6 +17,8 @@ public class RedisKeyConsts {
 	
 	public final static String ORDERBINDS = "ORDERBINDS:";
 	
+	public final static String CB_SESSION = "CB_SESSION:";
+	
 	public static String getKey(String... args) {
 		StringBuffer stringBuffer = new StringBuffer();
 		for (String key : args) {

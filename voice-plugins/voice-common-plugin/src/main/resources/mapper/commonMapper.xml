@@ -81,7 +81,7 @@
 	</select>
 	
 	<update id="updateBindStatus">
-		update tb_caas_bind_order set status = '1' where bindId = #{bindId}
+		update tb_caas_bind_order set bindStatus = '1' where bindId = #{bindId}
 	</update>
 	
 	<select id="getBindOrderStatusUrl" resultType="string">

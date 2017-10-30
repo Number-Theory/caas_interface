@@ -6,15 +6,37 @@ package com.caas.model;
  * @author xupiao 2017年10月26日
  *
  */
-public class ClickCallModel {
+public class ClickCallModel extends BaseModel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3789505118192635445L;
 	private String caller;
 	private String callee;
 	private String displayCaller;
 	private String displayCallee;
 	private Integer maxDuration; // 最大通话时长
 	private String billUrl;
-	private String stausUrl;
+	private String statusUrl;
 	private String userData;
+	private String callId;
+	private String record;
+
+	public String getRecord() {
+		return record;
+	}
+
+	public void setRecord(String record) {
+		this.record = record;
+	}
+
+	public String getCallId() {
+		return callId;
+	}
+
+	public void setCallId(String callId) {
+		this.callId = callId;
+	}
 
 	public String getCaller() {
 		return caller;
@@ -64,12 +86,12 @@ public class ClickCallModel {
 		this.billUrl = billUrl;
 	}
 
-	public String getStausUrl() {
-		return stausUrl;
+	public String getStatusUrl() {
+		return statusUrl;
 	}
 
-	public void setStausUrl(String stausUrl) {
-		this.stausUrl = stausUrl;
+	public void setStatusUrl(String statusUrl) {
+		this.statusUrl = statusUrl;
 	}
 
 	public String getUserData() {
