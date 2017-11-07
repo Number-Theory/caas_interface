@@ -12,15 +12,33 @@ public class ClickCallModel extends BaseModel {
 	 */
 	private static final long serialVersionUID = 3789505118192635445L;
 	private String caller;
-	private String callee;
+	private String called;
 	private String displayCaller;
-	private String displayCallee;
+	private String displayCalled;
 	private Integer maxDuration; // 最大通话时长
 	private String billUrl;
 	private String statusUrl;
+	private String recordUrl;
 	private String userData;
 	private String callId;
 	private String record;
+	private String userId;
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getRecordUrl() {
+		return recordUrl;
+	}
+
+	public void setRecordUrl(String recordUrl) {
+		this.recordUrl = recordUrl;
+	}
 
 	public String getRecord() {
 		return record;
@@ -46,12 +64,12 @@ public class ClickCallModel extends BaseModel {
 		this.caller = caller;
 	}
 
-	public String getCallee() {
-		return callee;
+	public String getCalled() {
+		return called;
 	}
 
-	public void setCallee(String callee) {
-		this.callee = callee;
+	public void setCalled(String called) {
+		this.called = called;
 	}
 
 	public String getDisplayCaller() {
@@ -62,12 +80,12 @@ public class ClickCallModel extends BaseModel {
 		this.displayCaller = displayCaller;
 	}
 
-	public String getDisplayCallee() {
-		return displayCallee;
+	public String getDisplayCalled() {
+		return displayCalled;
 	}
 
-	public void setDisplayCallee(String displayCallee) {
-		this.displayCallee = displayCallee;
+	public void setDisplayCalled(String displayCalled) {
+		this.displayCalled = displayCalled;
 	}
 
 	public Integer getMaxDuration() {

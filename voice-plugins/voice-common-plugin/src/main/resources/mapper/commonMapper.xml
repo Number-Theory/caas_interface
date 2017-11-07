@@ -76,7 +76,7 @@
 	</insert>
 	
 	<select id="getAllBindByDstVirtaulNum" resultType="map">
-		select bindId,caller,callee,dstVirtualNum,maxAge,record,callerDisplay,calleeDisplay,createDate as bindTime,callRestrict from tb_caas_bind_order t where t.dstVirtualNum=#{dstVirtualNum}
+		select bindId,caller,callee,dstVirtualNum,maxAge,record,callerDisplay,calleeDisplay,date_format(createDate,'%Y-%m-%d %H:%i:%S') as bindTime,callRestrict from tb_caas_bind_order t where t.dstVirtualNum=#{dstVirtualNum}
 		and t.userId=#{userId} and t.bindStatus='0' and DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() 
 	</select>
 	
@@ -112,6 +112,10 @@
 	
 	<select id="getTemplateContent" resultType="string">
 		select templateContent from tb_caas_template t where t.id=#{id} and t.userId=#{userId} and t.status='0'
+	</select>
+	
+	<select id="getBlackMobile" resultType="int">
+		select count(*) from tb_caas_black_mobile t where t.mobile = #{mobile}
 	</select>
 	
 </mapper>

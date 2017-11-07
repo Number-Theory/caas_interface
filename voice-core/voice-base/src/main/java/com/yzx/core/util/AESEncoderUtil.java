@@ -225,7 +225,7 @@ public class AESEncoderUtil {
     
     public static void main(String[] args) {
         AESEncoderUtil se=new AESEncoderUtil();
-        Scanner scanner=new Scanner(System.in);
+		Scanner scanner = new Scanner(System.in);
         /*
          * 加密
          */
@@ -244,7 +244,8 @@ public class AESEncoderUtil {
          content = scanner.next();
         System.out.println("根据输入的规则"+encodeRules+"解密后的明文是:"+se.AESDncode(encodeRules, content));*/
         
-        System.out.println(se.encrypt("caasvoicerest123", "caasvoicerest123"));
+		String str = "{caasvoicerest123 : = asdfafjklasjfkaji3u4jkdnvm,z,ejr38479823u4,mfjsakljdfklsadfjklsadgh293847932yr5fjklsdasjdklfjkaf!@#@#$#$^$%&%^^&*&&(*)*(}";
+        System.out.println(se.encrypt(str, "caasvoicerest123"));
         //System.out.println(se.decrypt("gSNyGc67t24Rsh8M5XwgXXh027tGFa4XJtyItCamIxKDX+4eMPHITBMh1fmFYmCM", "lpq12345lpq12345"));
        
 		/*try {

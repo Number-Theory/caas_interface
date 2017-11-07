@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/huaweiClickcall" displayName="华为点击呼叫接口" activator="com.caas.service.clickcall.HuaWeiClickCall"/>

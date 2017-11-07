@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/huaweiCancelClickcall" displayName="华为取消点击呼叫接口" activator="com.caas.service.clickcall.HuaWeiCancelClickCall"/>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="clickcall" displayName="点击呼叫插件"
+	activator="com.caas.clickcall.plugins.ClickCallPlugin" order="501"
+	enable="true" failOnInitError="true" />

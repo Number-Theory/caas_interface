@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="{version}/voice/clickcall/cancel/{userId}" displayName="取消点击呼叫接口"
+	activator="com.caas.clickcall.service.CancelClickcallService" isAsync="true" />

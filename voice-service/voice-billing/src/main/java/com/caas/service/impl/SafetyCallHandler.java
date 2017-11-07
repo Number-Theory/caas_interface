@@ -167,14 +167,14 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 			rateParams.put("deductionUnit", deductionUnitB);
 			rateParams.put("rateId", rateMap.get("id"));
 			dao.update("common.updateRateDeductionUnit", deductionUnitB);
-			cdrType = "0";
+			cdrTypeB = "0";
 			deductionUnitB = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnitB) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
 			rateParams.put("rateId", rateMap.get("id"));
 			dao.update("common.updateRateDeductionUnit", deductionUnitB);
-			cdrType = "0";
+			cdrTypeB = "0";
 			deductionUnitB = deductionUnitB - gratisUnit;
 		}
 

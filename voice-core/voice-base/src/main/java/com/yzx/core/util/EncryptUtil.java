@@ -34,7 +34,7 @@ public class EncryptUtil {
        byte[] b = md.digest(src.getBytes(UTF8));  
        return this.byte2HexStr(b);  
     }  
-      
+    
     /** 
      * BASE64编码
      * @param src 

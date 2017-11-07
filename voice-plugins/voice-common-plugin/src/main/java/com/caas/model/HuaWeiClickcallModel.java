@@ -21,7 +21,6 @@ public class HuaWeiClickcallModel extends BaseModel {
 	private Integer maxDuration;
 	private String feeListUrl;
 	private String statusNotifyUrl;
-	private String languageType = "0";
 	private String waitVoice;
 	private String bindNbr;
 	private String lastMinVoice;
@@ -30,7 +29,7 @@ public class HuaWeiClickcallModel extends BaseModel {
 	private String recordFlag = "false";
 	private String recordHintTone;
 	private String partyTypeRequiredInDisconnect = "true";
-	private String returnIdlePort = "false";
+//	private String returnIdlePort = "false";
 	private String userData;
 
 	public String getBindNbr() {
@@ -89,13 +88,13 @@ public class HuaWeiClickcallModel extends BaseModel {
 		this.partyTypeRequiredInDisconnect = partyTypeRequiredInDisconnect;
 	}
 
-	public String getReturnIdlePort() {
-		return returnIdlePort;
-	}
-
-	public void setReturnIdlePort(String returnIdlePort) {
-		this.returnIdlePort = returnIdlePort;
-	}
+//	public String getReturnIdlePort() {
+//		return returnIdlePort;
+//	}
+//
+//	public void setReturnIdlePort(String returnIdlePort) {
+//		this.returnIdlePort = returnIdlePort;
+//	}
 
 	public String getUserData() {
 		return userData;
@@ -191,14 +190,6 @@ public class HuaWeiClickcallModel extends BaseModel {
 
 	public void setStatusNotifyUrl(String statusNotifyUrl) {
 		this.statusNotifyUrl = statusNotifyUrl;
-	}
-
-	public String getLanguageType() {
-		return languageType;
-	}
-
-	public void setLanguageType(String languageType) {
-		this.languageType = languageType;
 	}
 
 	public String getWaitVoice() {

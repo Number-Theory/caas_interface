@@ -172,6 +172,8 @@ public class BindAXBService extends DefaultServiceCallBack {
 		authModel.setProductType("0"); // 虚拟小号
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
+		authModel.setCaller(caller);
+		authModel.setCallee(callee);
 
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";

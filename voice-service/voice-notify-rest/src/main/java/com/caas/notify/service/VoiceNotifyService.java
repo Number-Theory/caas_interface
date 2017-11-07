@@ -156,6 +156,8 @@ public class VoiceNotifyService extends DefaultServiceCallBack {
 		authModel.setProductType("4"); // 语音通知
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
+		authModel.setCaller(caller);
+		authModel.setCallee(callee);
 
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";

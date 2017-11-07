@@ -23,6 +23,24 @@ public class AuthModel extends BaseModel {
 	private String callID;
 	private String needBalance; // 是否需要校验余额，0：是，1：否
 	private String userData;
+	private String caller;
+	private String callee;
+
+	public String getCaller() {
+		return caller;
+	}
+
+	public void setCaller(String caller) {
+		this.caller = caller;
+	}
+
+	public String getCallee() {
+		return callee;
+	}
+
+	public void setCallee(String callee) {
+		this.callee = callee;
+	}
 
 	public String getNeedBalance() {
 		return needBalance;

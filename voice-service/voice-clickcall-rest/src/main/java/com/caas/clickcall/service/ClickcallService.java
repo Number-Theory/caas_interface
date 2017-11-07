@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.caas.dao.CaasDao;
 import com.caas.model.AuthModel;
@@ -36,6 +38,7 @@ import com.yzx.engine.spi.impl.DefaultServiceCallBack;
  * @author xupiao 2017年10月26日
  *
  */
+@Service
 public class ClickcallService extends DefaultServiceCallBack {
 	private static final Logger logger = LogManager.getLogger(ClickcallService.class);
 
@@ -62,12 +65,14 @@ public class ClickcallService extends DefaultServiceCallBack {
 		// 解析用户传入的字段
 		final ClickCallModel clickCallModel = JsonUtil.fromJson(request.getRequestString(), new TypeToken<ClickCallModel>() {
 		}.getType());
+		clickCallModel.setCallId(callId);
+		clickCallModel.setUserId(userId);
 
 		String caller = clickCallModel.getCaller();
-		String callee = clickCallModel.getCallee();
+		String callee = clickCallModel.getCalled();
 		String userData = clickCallModel.getUserData();
 		String displayCaller = clickCallModel.getDisplayCaller();
-		String displayCallee = clickCallModel.getDisplayCallee();
+		String displayCallee = clickCallModel.getDisplayCalled();
 		Integer maxDuraction = clickCallModel.getMaxDuration();
 
 		if (StringUtil.isNotEmpty(userData) && userData.length() > 128) {
@@ -122,10 +127,12 @@ public class ClickcallService extends DefaultServiceCallBack {
 		authModel.setCallID(callId);
 		authModel.setIpWhiteList(clientIp);
 		authModel.setEvent(REST_EVENT);
-		authModel.setPhoneNum(caller);
+		// authModel.setPhoneNum(caller);
 		authModel.setProductType("2"); // 标准回拨
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
+		authModel.setCaller(caller);
+		authModel.setCallee(callee);
 
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";
@@ -142,13 +149,26 @@ public class ClickcallService extends DefaultServiceCallBack {
 
 						// TODO 调度、路由
 
-						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/clickcall";
+						String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/huaweiClickcall";
 
 						try {
 							new HttpClient1(new ClientHandler() {
 								@Override
 								public void execute(HttpResponse response, String context) {
 									Log4jUtils.initLog4jContext(request.getLogId());
+									Map<String, Object> params = new HashMap<String, Object>();
+									params.put("userId", userId);
+									params.put("productType", "2");
+									Map<String, Object> callbackMap = dao.selectOne("common.getCallBackUrl", params);
+									if (StringUtil.isBlank(clickCallModel.getBillUrl())) {
+										clickCallModel.setBillUrl(String.valueOf(ObjectUtils.defaultIfNull(callbackMap.get("hangupUrl"), "")));
+									}
+									if (StringUtil.isBlank(clickCallModel.getStatusUrl())) {
+										clickCallModel.setBillUrl(String.valueOf(ObjectUtils.defaultIfNull(callbackMap.get("statusUrl"), "")));
+									}
+									if (StringUtil.isBlank(clickCallModel.getRecordUrl())) {
+										clickCallModel.setBillUrl(String.valueOf(ObjectUtils.defaultIfNull(callbackMap.get("recordUrl"), "")));
+									}
 									ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 									}.getType());
 									if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())) {// 成功
@@ -165,7 +185,7 @@ public class ClickcallService extends DefaultServiceCallBack {
 									setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, clickCallModel.getUserData());
 									HttpUtils.sendMessageJson(ctx, response.toString());
 								}
-							}).httpPost(controlUrl, JsonUtil.toJsonStr("")); // TODO
+							}).httpPost(controlUrl, JsonUtil.toJsonStr(clickCallModel)); // TODO
 						} catch (Exception e) {
 							logger.info("请求caas_control组件出错,ex={}", e);
 							setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, clickCallModel.getUserData());

@@ -66,4 +66,18 @@ public class DefaultServiceCallBack implements ServiceCallBackPoint {
 		}
 	}
 
+	public String removeMobileNationPrefix(String mobile) {
+		if (StringUtil.isBlank(mobile)) {
+			return "";
+		} else {
+			while (mobile.startsWith("+86")) {
+				mobile = mobile.substring(3);
+			}
+			if (mobile.matches("^(10|2\\d|[3-9]\\d{2})?\\d{6,8}$")) {
+				mobile = "0" + mobile;
+			}
+			return mobile;
+		}
+	}
+
 }

@@ -144,6 +144,7 @@ public class BindAXService extends DefaultServiceCallBack {
 		authModel.setProductType("1"); // 虚拟小号
 		authModel.setUserID(userId);
 		authModel.setNeedBalance("0");
+		authModel.setCaller(caller);
 
 		String authStr = JsonUtil.toJsonStr(authModel);
 		String authUrl = ConfigUtils.getProperty("caas_auth_url", String.class) + "/voiceAuth/caasCalls";

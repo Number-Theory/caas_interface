@@ -120,11 +120,10 @@ public class AuthService extends DefaultServiceCallBack {
 			logger.warn("主账户Token为空！");
 			return;
 		}
-		
+
 		String token = (String) userInfo.get("token");
-		
-		
-		if(!token.toUpperCase().equals(auths[0].toUpperCase())) {
+
+		if (!token.toUpperCase().equals(auths[0].toUpperCase())) {
 			logger.warn("主账号[" + userId + "]Authorization参数中账户token不正确");
 			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100015, AUTH_EVENT, authBean.getUserData());
 			return;
@@ -144,6 +143,24 @@ public class AuthService extends DefaultServiceCallBack {
 			setResponse(authBean.getCallID(), response, BusiErrorCode.B_100007, AUTH_EVENT, authBean.getUserData());
 			logger.warn("主账户[" + userId + "]的业务[" + authBean.getProductType() + "]状态[" + userInfo.get("status") + "]已禁用！");
 			return;
+		}
+
+		// 号码黑名单
+		if (StringUtil.isNotEmpty(authBean.getCaller())) {
+			String mobile = authBean.getCaller();
+			int count = dao.selectOne("common.getBlackMobile", mobile);
+			if (count > 0) {
+				logger.warn("号码[" + authBean.getCaller() + "]为受保护的号码");
+				setResponse(authBean.getCallID(), response, BusiErrorCode.B_100038, AUTH_EVENT, authBean.getUserData());
+			}
+		}
+		if (StringUtil.isNotEmpty(authBean.getCallee())) {
+			String mobile = authBean.getCallee();
+			int count = dao.selectOne("common.getBlackMobile", mobile);
+			if (count > 0) {
+				logger.warn("号码[" + authBean.getCallee() + "]为受保护的号码");
+				setResponse(authBean.getCallID(), response, BusiErrorCode.B_100038, AUTH_EVENT, authBean.getUserData());
+			}
 		}
 
 		// 是否是服务器白名单
