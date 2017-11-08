@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="control/minNumBindHwAX" displayName="华为AX绑定接口" activator="com.caas.service.minNum.MinNumBindHWAXService"/>
