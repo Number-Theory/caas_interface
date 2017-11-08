@@ -15,6 +15,7 @@ import com.caas.util.HttpUtilsForHw;
 import com.google.gson.reflect.TypeToken;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
+import com.yzx.core.util.EncryptUtil;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
@@ -44,15 +45,18 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 		huaWeiClickcallModel.setBindNbr("+862869514469");
 		huaWeiClickcallModel.setCalleeNbr(addMobileNationPrefix(clickCallModel.getCalled()));
 		huaWeiClickcallModel.setCallerNbr(addMobileNationPrefix(clickCallModel.getCaller()));
-		huaWeiClickcallModel.setCallId(clickCallModel.getCallId());
 		if (StringUtil.isNotEmpty(clickCallModel.getDisplayCalled())) {
 			huaWeiClickcallModel.setDisplayCalleeNbr(addMobileNationPrefix(clickCallModel.getDisplayCalled()));
 		}
 		if (StringUtil.isNotEmpty(clickCallModel.getDisplayCaller())) {
 			huaWeiClickcallModel.setDisplayNbr(addMobileNationPrefix(clickCallModel.getDisplayCaller()));
 		}
-		huaWeiClickcallModel.setFeeListUrl(clickCallModel.getBillUrl()); // TODO
-		huaWeiClickcallModel.setStatusNotifyUrl(clickCallModel.getStatusUrl()); // TODO
+		EncryptUtil encryptUtil = new EncryptUtil();
+		try {
+			huaWeiClickcallModel.setFeeUrl(encryptUtil.base64Encoder(clickCallModel.getBillUrl())); // TODO
+			huaWeiClickcallModel.setStatusUrl(encryptUtil.base64Encoder(clickCallModel.getStatusUrl())); // TODO
+		} catch (Exception e) {
+		}
 		huaWeiClickcallModel.setMaxDuration(clickCallModel.getMaxDuration());
 
 		if ("1".equals(clickCallModel.getRecord())) {
@@ -81,7 +85,7 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 				setResponse(clickCallModel.getCallId(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");
 				RedisOpClient.setAndExpire(RedisKeyConsts.getKey(RedisKeyConsts.CB_SESSION, clickCallModel.getCallId()), sessionId,
 						RedisKeyConsts.CB_SESSION_EXPIRE);
-				RedisOpClient.setAndExpire(RedisKeyConsts.getKey(RedisKeyConsts.CB_SESSION, sessionId), JsonUtil.toJsonStr(clickCallModel),
+				RedisOpClient.setAndExpire(RedisKeyConsts.getKey(RedisKeyConsts.CB_REQUEST, sessionId), JsonUtil.toJsonStr(clickCallModel),
 						RedisKeyConsts.CB_REQUEST_EXPIRE);
 			} else {
 				setResponse(clickCallModel.getCallId(), response, BusiErrorCode.B_100036, CONTROL_EVENT, "");

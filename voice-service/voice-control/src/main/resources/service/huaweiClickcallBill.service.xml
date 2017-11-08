@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="voice/clickcall/huaweibill" displayName="华为话单回调接口"
+	activator="com.caas.service.callback.clickcall.HuaweiClickcallBillService" />

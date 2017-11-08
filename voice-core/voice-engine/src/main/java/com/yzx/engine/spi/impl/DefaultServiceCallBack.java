@@ -2,7 +2,11 @@ package com.yzx.engine.spi.impl;
 
 import io.netty.channel.ChannelHandlerContext;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
 import com.yzx.core.consts.EnumType.BusiErrorCode;
 import com.yzx.core.util.StringUtil;
@@ -78,6 +82,20 @@ public class DefaultServiceCallBack implements ServiceCallBackPoint {
 			}
 			return mobile;
 		}
+	}
+
+	public static String utc2Local(String utcTime, String utcTimePatten, String localTimePatten) {
+		SimpleDateFormat utcFormater = new SimpleDateFormat(utcTimePatten);
+		utcFormater.setTimeZone(TimeZone.getTimeZone("UTC"));
+		Date gpsUTCDate = null;
+		try {
+			gpsUTCDate = utcFormater.parse(utcTime);
+		} catch (ParseException e) {
+		}
+		SimpleDateFormat localFormater = new SimpleDateFormat(localTimePatten);
+		localFormater.setTimeZone(TimeZone.getDefault());
+		String localTime = localFormater.format(gpsUTCDate.getTime());
+		return localTime;
 	}
 
 }

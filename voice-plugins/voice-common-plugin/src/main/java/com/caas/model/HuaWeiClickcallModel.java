@@ -11,7 +11,6 @@ public class HuaWeiClickcallModel extends BaseModel {
 	 */
 	private static final long serialVersionUID = 3804665873531369619L;
 	private String version;
-	private String callId;
 	private String accessToken;
 	private String appKey;
 	private String callerNbr;
@@ -19,8 +18,8 @@ public class HuaWeiClickcallModel extends BaseModel {
 	private String displayNbr;
 	private String displayCalleeNbr;
 	private Integer maxDuration;
-	private String feeListUrl;
-	private String statusNotifyUrl;
+	private String feeUrl;
+	private String statusUrl;
 	private String waitVoice;
 	private String bindNbr;
 	private String lastMinVoice;
@@ -112,14 +111,6 @@ public class HuaWeiClickcallModel extends BaseModel {
 		this.version = version;
 	}
 
-	public String getCallId() {
-		return callId;
-	}
-
-	public void setCallId(String callId) {
-		this.callId = callId;
-	}
-
 	public String getAccessToken() {
 		return accessToken;
 	}
@@ -176,20 +167,20 @@ public class HuaWeiClickcallModel extends BaseModel {
 		this.maxDuration = maxDuration;
 	}
 
-	public String getFeeListUrl() {
-		return feeListUrl;
+	public String getFeeUrl() {
+		return feeUrl;
 	}
 
-	public void setFeeListUrl(String feeListUrl) {
-		this.feeListUrl = feeListUrl;
+	public void setFeeUrl(String feeUrl) {
+		this.feeUrl = feeUrl;
 	}
 
-	public String getStatusNotifyUrl() {
-		return statusNotifyUrl;
+	public String getStatusUrl() {
+		return statusUrl;
 	}
 
-	public void setStatusNotifyUrl(String statusNotifyUrl) {
-		this.statusNotifyUrl = statusNotifyUrl;
+	public void setStatusUrl(String statusUrl) {
+		this.statusUrl = statusUrl;
 	}
 
 	public String getWaitVoice() {
