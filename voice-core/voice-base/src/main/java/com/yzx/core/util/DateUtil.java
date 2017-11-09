@@ -842,6 +842,18 @@ public class DateUtil {
 	}
 
 	/**
+	 * 日期加秒
+	 * @param date 需增加的日期
+	 * @param second 增加的秒
+	 * @return
+	 */
+	public static Date addSecond(Date date,int second) {
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(getMillis(date)+second*1000);
+		return c.getTime();
+	}
+	
+	/**
 	 * 返回日期毫秒
 	 * 
 	 * @param date

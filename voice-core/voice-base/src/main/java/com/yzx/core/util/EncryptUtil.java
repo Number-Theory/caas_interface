@@ -13,6 +13,7 @@
 package com.yzx.core.util;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -57,6 +58,24 @@ public class EncryptUtil {
         return new String(decoder.decodeBuffer(dest), UTF8);  
     }  
       
+	/**
+     * base64加密
+     * 
+     * @param bt 被sha256加密过后的byte
+     * @return
+     * @see [类、类#方法、类#成员]
+     */
+    public static String base64(byte[] bt)
+    {
+        String s = null;
+        if (null != bt)
+        {
+            s = new BASE64Encoder().encode(bt);
+        }
+
+        return s;
+    }
+	
     /** 
      * 字节数组转化为大写16进制字符串 
      * @param b 
@@ -73,4 +92,21 @@ public class EncryptUtil {
         }  
         return sb.toString();  
     }  
+    
+    /**
+     * sha256加密
+     * 
+     * @param param  加密的参数
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @see [类、类#方法、类#成员]
+     */
+    public static byte[] SHA256(String param)
+        throws NoSuchAlgorithmException
+    {
+        byte[] bt = param.getBytes();
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(bt);
+        return md.digest();
+    }
 }  
