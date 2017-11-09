@@ -29,12 +29,12 @@ public class CallbackHandler extends DefaultBillingHandler {
 	public void handler(BillingModel billingModel, ServiceResponse response) {
 		String userId = billingModel.getUserId();
 		String productType = billingModel.getProductType();
-		String caller = billingModel.getCaller(); //原始主叫
-		String callee = billingModel.getCalled(); //原始被叫
+		String caller = billingModel.getCaller(); // 原始主叫
+		String callee = billingModel.getCalled(); // 原始被叫
 
 		// 根据号码获取费率
 		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("phoneNumber", billingModel.getCalled());
+		params.put("phoneNumber", billingModel.getCallerDisplay());
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
 		boolean flag = true;
@@ -50,73 +50,59 @@ public class CallbackHandler extends DefaultBillingHandler {
 		// 计费
 		String billingType = (String) rateMap.get("billingType");
 		Long callTime = 0L, callTimeB = 0L, payMoney = 0L;
-		String callerCity = NumberUtils.getMobileAttribution(billingModel.getCallerDisplay()), calledCity = NumberUtils.getMobileAttribution(caller);
-		String callerCityB = NumberUtils.getMobileAttribution(billingModel.getCalledDisplay()), calledCityB = NumberUtils.getMobileAttribution(callee);
+		String callerCity = NumberUtils.getMobileAttribution(caller), calledCity = NumberUtils.getMobileAttribution(callee);
 		Long callPrice = 0L, callPriceB = 0L, deductionUnit = 0L, deductionUnitB = 0L;
 		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
 		if ("0".equals(billingType)) { // A路B路分开计费
 			if ("0".equals(billingModel.getCallStatus())) { // A路
-				callTime = billingModel.getCallTime();
-				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
-					callPrice = (Long) rateMap.get("iddPrice");
-					billingModel.setCallType("2");
+				if (NumberUtils.isInternationalPhone(caller)) { // 国际电话
+					callPriceB = (Long) rateMap.get("iddPrice");
+					billingModel.setCallTypeB("2");
 				} else {
-					if (callerCity.equals(calledCity)) { // 市话
-						callPrice = (Long) rateMap.get("localPrice");
-						billingModel.setCallType("0");
-					} else { // 长途
-						callPrice = (Long) rateMap.get("dddPrice");
-						billingModel.setCallType("1");
-					}
+					callTime = billingModel.getCallTime(); // 强显
+					callPrice = (Long) rateMap.get("coercePrice");
+					billingModel.setCallType("3");
 				}
 			}
 			if ("0".equals(billingModel.getCallStatusB())) { // B路
 				callTimeB = billingModel.getCallTimeB();
-				if (NumberUtils.isInternationalPhone(billingModel.getRealityNumber())) { // 国际电话
+				if (NumberUtils.isInternationalPhone(callee)) { // 国际电话
 					callPriceB = (Long) rateMap.get("iddPrice");
 					billingModel.setCallTypeB("2");
 				} else {
-					if (callerCityB.equals(calledCityB)) { // 市话
-						callPriceB = (Long) rateMap.get("localPrice");
-						billingModel.setCallTypeB("0");
-					} else { // 长途
-						callPriceB = (Long) rateMap.get("dddPrice");
-						billingModel.setCallTypeB("1");
+					if (!caller.equals(billingModel.getCalledDisplay())) { // 强显
+						callPriceB = (Long) rateMap.get("coercePrice");
+						billingModel.setCallTypeB("3");
+					} else { // 透传
+						callPriceB = (Long) rateMap.get("lucencyPrice");
+						billingModel.setCallTypeB("4");
 					}
 				}
 			}
-		} else if ("1".equals(billingType)) {// 按次扣费
-			callTime = billingModel.getCallTime();
-			callPrice = (Long) rateMap.get("oncePrice");
 		} else if ("2".equals(billingType)) {// 按B路时长扣费
 			if ("0".equals(billingModel.getCallStatusB())) { // B路
-				callTime = billingModel.getCallTime();
 				if ("0".equals(billingModel.getCallStatusB())) { // A路
 					callTime = billingModel.getCallTimeB();
-					if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
+					if (NumberUtils.isInternationalPhone(caller)) { // 国际电话
 						callPrice = (Long) rateMap.get("iddPrice");
 						billingModel.setCallType("2");
 					} else {
-						if (callerCity.equals(calledCity)) { // 市话
-							callPrice = (Long) rateMap.get("localPrice");
-							billingModel.setCallType("0");
-						} else { // 长途
-							callPrice = (Long) rateMap.get("dddPrice");
-							billingModel.setCallType("1");
-						}
+						callTime = billingModel.getCallTime(); // 强显
+						callPrice = (Long) rateMap.get("coercePrice");
+						billingModel.setCallType("3");
 					}
 
 					callTimeB = billingModel.getCallTimeB();
-					if (NumberUtils.isInternationalPhone(billingModel.getRealityNumber())) { // 国际电话
+					if (NumberUtils.isInternationalPhone(callee)) { // 国际电话
 						callPriceB = (Long) rateMap.get("iddPrice");
 						billingModel.setCallTypeB("2");
 					} else {
-						if (callerCityB.equals(calledCityB)) { // 市话
-							callPriceB = (Long) rateMap.get("localPrice");
-							billingModel.setCallTypeB("0");
-						} else { // 长途
-							callPriceB = (Long) rateMap.get("dddPrice");
-							billingModel.setCallTypeB("1");
+						if (!caller.equals(billingModel.getCalledDisplay())) { // 强显
+							callPriceB = (Long) rateMap.get("coercePrice");
+							billingModel.setCallTypeB("3");
+						} else { // 透传
+							callPriceB = (Long) rateMap.get("lucencyPrice");
+							billingModel.setCallTypeB("4");
 						}
 					}
 				}

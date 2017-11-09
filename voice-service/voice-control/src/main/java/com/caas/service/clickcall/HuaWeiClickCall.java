@@ -53,8 +53,8 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 		}
 		EncryptUtil encryptUtil = new EncryptUtil();
 		try {
-			huaWeiClickcallModel.setFeeUrl(encryptUtil.base64Encoder(clickCallModel.getBillUrl())); // TODO
-			huaWeiClickcallModel.setStatusUrl(encryptUtil.base64Encoder(clickCallModel.getStatusUrl())); // TODO
+			huaWeiClickcallModel.setFeeUrl(encryptUtil.base64Encoder(ConfigUtils.getProperty("hw_callback_bill", String.class)));
+			huaWeiClickcallModel.setStatusUrl(encryptUtil.base64Encoder(ConfigUtils.getProperty("hw_callback_status", String.class))); // TODO
 		} catch (Exception e) {
 		}
 		huaWeiClickcallModel.setMaxDuration(clickCallModel.getMaxDuration());
