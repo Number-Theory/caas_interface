@@ -188,10 +188,18 @@ public class BindAXBService extends DefaultServiceCallBack {
 					}.getType());
 					if (BusiErrorCode.B_000000.getErrCode().equals(authResponse.getResult())) {
 
-						String className = "com.caas.service.impl.GxAXBService";// TODO
+						String className = "com.caas.service.impl.HwAXBService";// TODO
 						BaseAXBService axbService = new GxAXBService();
+						try {
+							axbService = (BaseAXBService) Class.forName(className).newInstance();
+						} catch (Exception e) {
+							logger.error("className=[" + className + "]实例化失败，", e);
+							setResponse(callId, response, BusiErrorCode.B_100025, REST_EVENT, safetyCallModel.getUserData());
+							HttpUtils.sendMessageJson(ctx, response.toString());
+							return;
+						}
 						axbService.axbBind(callId, safetyCallModel, ctx, request, response);
-						RedisOpClient.set(RedisKeyConsts.getKey("apiServer:", bindId), className);
+						RedisOpClient.setAndExpire(RedisKeyConsts.getKey("apiServer:", bindId), className, Integer.valueOf(safetyCallModel.getMaxAge()));
 
 					} else {
 						// 将鉴权的错误结果异步写回客户端

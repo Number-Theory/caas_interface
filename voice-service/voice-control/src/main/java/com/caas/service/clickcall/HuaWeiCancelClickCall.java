@@ -59,7 +59,7 @@ public class HuaWeiCancelClickCall extends DefaultServiceCallBack {
 		String respData = HttpUtilsForHw.postJSON(url, body);
 		logger.info("【请求华为取消点击呼叫接口路径】返回结果resp={}", respData);
 
-		if (null != respData && respData != "") {
+		if (StringUtil.isNotEmpty(respData)) {
 			JSONObject fromJson = JSONObject.parseObject(respData);
 			String resultcode = fromJson.getString("resultcode");
 			if ("0".equals(resultcode)) {

@@ -115,7 +115,6 @@ public class UnBindAXBService extends DefaultServiceCallBack {
 							return;
 						}
 						axbService.axbUnbind(callId, safetyCallModel, ctx, request, response);
-
 					} else {
 						// 将鉴权的错误结果异步写回客户端
 						HttpUtils.sendMessageJson(ctx, authResponse.toString());

@@ -77,6 +77,7 @@ public class GxAXService extends DefaultServiceCallBack implements BaseAXService
 		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumBindAX";
 		try {
 			new HttpClient1(new ClientHandler() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void execute(HttpResponse response, String context) {
 					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
@@ -227,5 +228,74 @@ public class GxAXService extends DefaultServiceCallBack implements BaseAXService
 			setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, minNumModel.getUserData());
 			HttpUtils.sendMessageJson(ctx, response.toString());
 		}
+	}
+
+	@Override
+	public void onlineCall(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response) {
+		String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
+		Map<String, String> orderRecordMap = RedisOpClient.hgetall(orderRecordKey);
+		if (orderRecordMap == null || orderRecordMap.isEmpty()) {
+			setResponse(callId, response, BusiErrorCode.B_100027, REST_EVENT, minNumModel.getUserData());
+			HttpUtils.sendMessageJson(ctx, response.toString());
+			return;
+		}
+
+		String subid = orderRecordMap.get("subid");
+		String dstVirtualNum = orderRecordMap.get("dstVirtualNum");
+		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, dstVirtualNum);
+
+		final GxInfo gxInfo = new GxInfo();
+		gxInfo.setSubid(subid);
+		gxInfo.setTelB(minNumModel.getCallee());
+		gxInfo.setRequestId(minNumModel.getBindId());
+
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumOnlineCallAX"; // TODO
+		try {
+			new HttpClient1(new ClientHandler() {
+				@Override
+				public void execute(HttpResponse response, String context) {
+					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
+					Log4jUtils.initLog4jContext(request.getLogId());
+					ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
+					}.getType());
+					if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
+							&& (resultMap != null && resultMap.containsKey("code") && "0".equals(resultMap.get("code")))) {
+
+						RedisOpClient.hset(calleeNumBindKey, "callee", minNumModel.getCallee());
+						logger.info("【AX号码绑闭】绑闭callerNumBindKey={}", calleeNumBindKey);
+
+						String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
+						RedisOpClient.hset(orderRecordKey, "callee", minNumModel.getCallee());
+						logger.info("【AX号码绑闭】订单关系callerNumBindKey={}", calleeNumBindKey);
+
+						// TODO 订单状态更新
+
+						controlResponse.getOtherMap().put("bindId", minNumModel.getBindId());
+						controlResponse.getOtherMap().put("userData", minNumModel.getUserData());
+						HttpUtils.sendMessageJson(ctx, controlResponse.toString());
+
+					} else {
+						if (resultMap != null && resultMap.containsKey("code") && !"0".equals(resultMap.get("code"))) {
+							setResponse(callId, controlResponse, BusiErrorCode.B_100028, REST_EVENT, minNumModel.getUserData());
+							logger.error("【AX号码绑闭】号码绑闭失败[{}].", resultMap);
+						}
+						HttpUtils.sendMessageJson(ctx, controlResponse.toString());
+					}
+				}
+
+				@Override
+				public void failed(Exception ex) {
+					Log4jUtils.initLog4jContext(request.getLogId());
+					logger.info("请求caas_control组件失败,ex={}", ex);
+					setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, minNumModel.getUserData());
+					HttpUtils.sendMessageJson(ctx, response.toString());
+				}
+			}).httpPost(controlUrl, JsonUtil.toJsonStr(gxInfo));
+		} catch (Exception e) {
+			logger.info("请求caas_control组件出错,ex={}", e);
+			setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, minNumModel.getUserData());
+			HttpUtils.sendMessageJson(ctx, response.toString());
+		}
+
 	}
 }

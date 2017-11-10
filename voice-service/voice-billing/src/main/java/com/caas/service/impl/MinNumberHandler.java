@@ -39,12 +39,20 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
 		boolean flag = true;
+		String selectPhoneNumber = callee;
 		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
 		if (rateMap == null || rateMap.isEmpty()) {
-			logger.info("获取号码套餐失败，查询默认套餐！");
-			params.put("phoneNumber", "0");
+			logger.info("获取号码套餐失败，查询用户默认套餐！");
+			params.put("phoneNumber", userId);
+			selectPhoneNumber = userId;
 			rateMap = dao.selectOne("common.getNumberRate", params);
-			flag = false;
+			if (rateMap == null || rateMap.isEmpty()) {
+				logger.info("获取用户套餐失败，查询默认套餐！");
+				selectPhoneNumber = "0";
+				params.put("phoneNumber", "0");
+				rateMap = dao.selectOne("common.getNumberRate", params);
+				flag = false;
+			}
 		}
 		logger.info("查询到的套餐为[{}]", rateMap);
 
@@ -136,7 +144,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		Long gratisUnit = 0L;
 		if (flag) {
 			Map<String, Object> sqlParams = new HashMap<String, Object>();
-			sqlParams.put("phoneNumber", callee);
+			sqlParams.put("phoneNumber", selectPhoneNumber);
 			sqlParams.put("productType", billingModel.getProductType());
 			sqlParams.put("userId", billingModel.getUserId());
 			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);
@@ -145,7 +153,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		if (gratisUnit >= deductionUnit) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnit);
@@ -154,7 +162,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnit) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnit);
@@ -165,15 +173,19 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		String cdrTypeB = "1";
 		if (gratisUnit >= deductionUnitB) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
-			rateParams.put("deductionUnit", deductionUnitB);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("deductionUnit", gratisUnit);
+			rateParams.put("phoneNumber", selectPhoneNumber);
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnitB);
 			cdrTypeB = "0";
 			deductionUnitB = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnitB) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
 			dao.update("common.updateRateDeductionUnit", deductionUnitB);
 			cdrTypeB = "0";
 			deductionUnitB = deductionUnitB - gratisUnit;

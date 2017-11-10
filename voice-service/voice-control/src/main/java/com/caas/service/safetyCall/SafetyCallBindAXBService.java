@@ -16,6 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
 import com.yzx.core.util.JsonUtil;
+import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
@@ -66,7 +67,7 @@ public class SafetyCallBindAXBService extends DefaultServiceCallBack {
 		String respData = HttpUtilsForGx.postJSON(url, body, gxInfo.getPortType() == null ? "0" : gxInfo.getPortType());
 		logger.info("【请求广西东信绑定接口路径】返回结果resp={}", respData);
 
-		if (null != respData && respData != "") {
+		if (StringUtil.isNotEmpty(respData)) {
 			JSONObject fromJson = JSONObject.parseObject(respData);
 			setResponse(gxInfo.getRequestId(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");
 			response.getOtherMap().putAll(fromJson);

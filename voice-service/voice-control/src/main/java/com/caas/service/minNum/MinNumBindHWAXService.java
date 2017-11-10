@@ -10,15 +10,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.caas.model.GxInfo;
 import com.caas.model.HuaweiBindInfo;
-import com.caas.util.HttpUtilsForGx;
-import com.caas.util.HttpUtilsForHw;
 import com.caas.util.HttpUtilsForHwMinNum;
 import com.google.gson.reflect.TypeToken;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
 import com.yzx.core.util.JsonUtil;
+import com.yzx.core.util.StringUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
@@ -41,22 +39,21 @@ public class MinNumBindHWAXService extends DefaultServiceCallBack {
 		logger.info("【接收到Rest组件请求信息】huaweiBindInfo={}", huaweiBindInfo);
 
 		// 封装参数请求华为
-		//String xmode = huaweiBindInfo.getXmode();
 		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("requestId", huaweiBindInfo.getRequestId());
-		param.put("aParty", huaweiBindInfo.getaParty());
-		param.put("virtualNumber", huaweiBindInfo.getVirtualNumber());
+		param.put("aParty", add86MobileNationPrefix(huaweiBindInfo.getaParty()));
+		param.put("virtualNumber", add86MobileNationPrefix(huaweiBindInfo.getVirtualNumber()));
 		param.put("isRecord", huaweiBindInfo.getIsRecord());
 		param.put("calledNumDisplay", huaweiBindInfo.getCalledNumDisplay());
-		/*Map<String, Object> extraMap = new HashMap<String, Object>();
-		param.put("extParas", extraMap);
-*/
+		/*
+		 * Map<String, Object> extraMap = new HashMap<String, Object>();
+		 * param.put("extParas", extraMap);
+		 */
 		String body = JsonUtil.toJsonStr(param);
 		logger.info("【请求华为绑定接口参数】body={}", body);
 
 		// 封装请求华为的接口路径
 
-		String url = ConfigUtils.getProperty("baseUrl_hw", String.class) + ConfigUtils.getProperty("bindNumberUrl_hw_ax", String.class) ;
+		String url = ConfigUtils.getProperty("baseUrl_hw", String.class) + ConfigUtils.getProperty("bindNumberUrl_hw_ax", String.class);
 		logger.info("【请求华为绑定接口路径】url={}", url);
 		String appKey = ConfigUtils.getProperty("appKey_hw", String.class);
 		logger.info("【请求华为绑定接口路径】appKey={}", appKey);
@@ -67,10 +64,10 @@ public class MinNumBindHWAXService extends DefaultServiceCallBack {
 		String respData = HttpUtilsForHwMinNum.sendPost(appKey, appSecret, url, body);
 		logger.info("【请求华为绑定接口路径】返回结果resp={}", respData);
 
-		if (null != respData && respData != "") {
+		if (StringUtil.isNotEmpty(respData)) {
 			JSONObject fromJson = JSONObject.parseObject(respData);
 			setResponse(huaweiBindInfo.getRequestId(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");
-			response.getOtherMap().putAll(fromJson);
+			response.getOtherMap().put("apiRes", (Map<String, Object>) fromJson);
 		} else {
 			setResponse(huaweiBindInfo.getRequestId(), response, BusiErrorCode.B_900000, CONTROL_EVENT, "");
 		}

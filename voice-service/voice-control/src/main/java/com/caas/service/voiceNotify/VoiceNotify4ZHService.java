@@ -9,11 +9,14 @@ import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
 import com.yzx.core.util.EncryptUtil;
 import com.yzx.core.util.JsonUtil;
+import com.yzx.core.util.StringUtil;
 import com.yzx.core.util.XMLUtil;
 import com.yzx.engine.model.ServiceRequest;
 import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
+
 import io.netty.channel.ChannelHandlerContext;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -59,7 +62,7 @@ public class VoiceNotify4ZHService extends DefaultServiceCallBack {
 		}
 		logger.info("【请求语音验证码接口路径】返回结果resp={}", respData);
 
-		if (null != respData && respData != "") {
+		if (StringUtil.isNotEmpty(respData)) {
 			VoiceCode4ZHCallbackModel vcResp = (VoiceCode4ZHCallbackModel) XMLUtil.convertXmlStrToObject(VoiceCode4ZHCallbackModel.class, respData);
 			if ("0".equals(vcResp.getResult())) {
 				setResponse(vc.getExtparam(), response, BusiErrorCode.B_000000, CONTROL_EVENT, "");

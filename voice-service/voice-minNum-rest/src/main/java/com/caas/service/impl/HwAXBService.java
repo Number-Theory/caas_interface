@@ -1,6 +1,8 @@
 package com.caas.service.impl;
 
-import java.util.Date;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.HttpResponse;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,6 @@ import com.yzx.access.util.HttpUtils;
 import com.yzx.auth.plugin.SpringContext;
 import com.yzx.core.config.ConfigUtils;
 import com.yzx.core.consts.EnumType.BusiErrorCode;
-import com.yzx.core.util.DateUtil;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.core.util.Log4jUtils;
 import com.yzx.core.util.StringUtil;
@@ -29,9 +30,6 @@ import com.yzx.engine.model.ServiceResponse;
 import com.yzx.engine.spi.impl.DefaultServiceCallBack;
 import com.yzx.redis.RedisKeyConsts;
 import com.yzx.redis.RedisOpClient;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpResponse;
 
 public class HwAXBService extends DefaultServiceCallBack implements BaseAXBService {
 
@@ -43,10 +41,9 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 	private static final Logger logger = LogManager.getLogger(HwAXBService.class);
 
 	private CaasDao dao = SpringContext.getInstance(CaasDao.class);
-	
+
 	@Override
-	public void axbBind(String callId, SafetyCallModel safetyCallModel, ChannelHandlerContext ctx,
-			ServiceRequest request, ServiceResponse response) {
+	public void axbBind(String callId, SafetyCallModel safetyCallModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response) {
 		String caller = safetyCallModel.getCaller();
 		String callee = safetyCallModel.getCallee();
 		String dstVirtualNum = safetyCallModel.getDstVirtualNum();
@@ -63,10 +60,13 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 		HwBindInfo.setIsRecord(safetyCallModel.getRecord());
 		HwBindInfo.setBindDirection(changeBindDirection(safetyCallModel));
 		HwBindInfo.setCityCode(safetyCallModel.getCityId());
-		//获取
-		Date  endDate= DateUtil.addSecond(new Date(), Integer.parseInt(safetyCallModel.getMaxAge()));
-		HwBindInfo.setEndTime(DateUtil.dateToStr(endDate, "YYYY-MM-DD'T'hh:mm:ss'Z'"));
-		
+		// 获取
+		// Date endDate = DateUtil.addSecond(new Date(),
+		// Integer.parseInt(safetyCallModel.getMaxAge()));
+		// HwBindInfo.setEndTime(DateUtil.dateToStr(endDate,
+		// "yyyy-MM-dd'T'HH:mm:ss'Z'"));
+		HwBindInfo.setEndTime(getUtcTime(Integer.valueOf(safetyCallModel.getMaxAge())));
+
 		final String[] subid = { "" };
 		final String[] orderRecordKeyOld = { "" };
 		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindHWAXB";
@@ -76,30 +76,45 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 			orderRecordKeyOld[0] = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, bindIdOld);
 			Map<String, String> orderRecordMapOld = RedisOpClient.hgetall(orderRecordKeyOld[0]);
 			subid[0] = orderRecordMapOld.get("subid");
+			HwBindInfo.setSubscriptionId(subid[0]);
+			Long ttl = RedisOpClient.ttl(callerNumBindKey);
+			if (ttl != -2 && ttl != -1) {
+				safetyCallModel.setMaxAge(String.valueOf(ttl));
+			}
 
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB" + "/" + subid[0];
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB";
 		} else if (calleeBindIdMapOld != null && !calleeBindIdMapOld.isEmpty()) {// 如果选取的被叫和中间号存在绑定关系，置换主被叫，绑定更新接口
 
-			String bindIdOld = callerBindIdMapOld.get("bindId");
+			String bindIdOld = calleeBindIdMapOld.get("bindId");
 			orderRecordKeyOld[0] = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, bindIdOld);
 			Map<String, String> orderRecordMapOld = RedisOpClient.hgetall(orderRecordKeyOld[0]);
 			subid[0] = orderRecordMapOld.get("subid");
-
+			HwBindInfo.setSubscriptionId(subid[0]);
 			HwBindInfo.setaParty(safetyCallModel.getCallee());
 			HwBindInfo.setbParty(safetyCallModel.getCaller());
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB" + "/" + subid[0];
+			safetyCallModel.setMaxAge(String.valueOf(RedisOpClient.ttl(callerNumBindKey)));
+			Long ttl = RedisOpClient.ttl(calleeNumBindKey);
+			if (ttl != -2 && ttl != -1) {
+				safetyCallModel.setMaxAge(String.valueOf(ttl));
+			}
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB";
 		} else { // 绑定接口
 			HwBindInfo.setVirtualNumber(safetyCallModel.getDstVirtualNum());
 		}
 
 		try {
 			new HttpClient1(new ClientHandler() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void execute(HttpResponse response, String context) {
-					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
 					Log4jUtils.initLog4jContext(request.getLogId());
 					ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
+					Map<String, Object> resultMap = null;
+					if (JsonUtil.jsonStrToMap(context).containsKey("apiRes")) {
+						resultMap = (Map<String, Object>) JsonUtil.jsonStrToMap(context).get("apiRes");
+					}
+
 					if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
 							&& (resultMap != null && resultMap.containsKey("code") && "000000".equals(String.valueOf(resultMap.get("code"))))) {
 
@@ -125,7 +140,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 						calleeBindIdMap.put("cityId", safetyCallModel.getCityId());
 						String calleeBindRes = RedisOpClient.hmset(calleeNumBindKey, calleeBindIdMap, Integer.valueOf(safetyCallModel.getMaxAge()));
 						logger.info("【AXB号码绑定】号码绑定记录哈希表中插入绑定关系calleeBindRes={},calleeNumBindKey={},calleeBindIdMap={},maxAge={}", calleeBindRes,
-								callerNumBindKey, calleeBindIdMap, Integer.valueOf(safetyCallModel.getMaxAge()));
+								calleeNumBindKey, calleeBindIdMap, Integer.valueOf(safetyCallModel.getMaxAge()));
 
 						String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, safetyCallModel.getBindId());
 						Map<String, String> orderRecordMap = new HashMap<String, String>();
@@ -161,7 +176,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 						}
 						orderRecordMap.put("cityId", safetyCallModel.getCityId());
 						orderRecordMap.put("productType", "0");
-						if (resultMap.containsKey("data")) { // 绑定
+						if (resultMap.containsKey("result")) { // 绑定
 							orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("result")).get("subscriptionId")));
 						} else { // 绑定更新
 							orderRecordMap.put("subid", subid[0]);
@@ -200,17 +215,11 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 			setResponse(callId, response, BusiErrorCode.B_900000, REST_EVENT, safetyCallModel.getUserData());
 			HttpUtils.sendMessageJson(ctx, response.toString());
 		}
-		
-		
-		
+
 	}
 
-	
-	
-	
 	@Override
-	public void axbUnbind(String callId, SafetyCallModel safetyCallModel, ChannelHandlerContext ctx,
-			ServiceRequest request, ServiceResponse response) {
+	public void axbUnbind(String callId, SafetyCallModel safetyCallModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response) {
 		String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, safetyCallModel.getBindId());
 		Map<String, String> orderRecordMap = RedisOpClient.hgetall(orderRecordKey);
 		if (orderRecordMap == null || orderRecordMap.isEmpty()) {
@@ -225,21 +234,25 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, callee, dstVirtualNum);
 		final String callerNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, caller, dstVirtualNum);
 		final HuaweiBindInfo HwBindInfo = new HuaweiBindInfo();
-		//按绑定关系解绑
-		HwBindInfo.setType("2"); 
-		//绑定关系
-		HwBindInfo.setSubscriptionId(subid); 
+		// 按绑定关系解绑
+		HwBindInfo.setType("2");
+		// 绑定关系
+		HwBindInfo.setSubscriptionId(subid);
 		HwBindInfo.setRequestId(callId);
 
-		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnbindAXB";
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnBindHWAXB";
 		try {
 			new HttpClient1(new ClientHandler() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void execute(HttpResponse response, String context) {
-					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
 					Log4jUtils.initLog4jContext(request.getLogId());
 					ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
+					Map<String, Object> resultMap = null;
+					if (JsonUtil.jsonStrToMap(context).containsKey("apiRes")) {
+						resultMap = (Map<String, Object>) JsonUtil.jsonStrToMap(context).get("apiRes");
+					}
 					if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
 							&& (resultMap != null && resultMap.containsKey("code") && "000000".equals(String.valueOf(resultMap.get("code"))))) {
 
@@ -287,21 +300,22 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 
 	/**
 	 * 将我平台对应的axb呼入权限设置转化为华为接口对应的参数
+	 * 
 	 * @param model
 	 */
 	private String changeBindDirection(SafetyCallModel model) {
 		String callRestrict = model.getCallRestrict();
-		String res ="";
-		if ("1".equals(callRestrict)) {//、AXB做呼叫控制，A和B有权限，其他号码无权限
-			res = "0"; //华为接口 0表示ab可以互打
+		String res = "";
+		if ("1".equals(callRestrict)) {// 、AXB做呼叫控制，A和B有权限，其他号码无权限
+			res = "0"; // 华为接口 0表示ab可以互打
 		}
-		if ("2".equals(callRestrict)) {//，A无权限，B有权限
-			res = "2"; //华为接口 1 表示只能B打给A
+		if ("2".equals(callRestrict)) {// ，A无权限，B有权限
+			res = "2"; // 华为接口 1 表示只能B打给A
 		}
-		if ("3".equals(callRestrict)) {//A有权限，B无权限
-			res = "1"; //华为接口 1 表示只能A 打给 B
+		if ("3".equals(callRestrict)) {// A有权限，B无权限
+			res = "1"; // 华为接口 1 表示只能A 打给 B
 		}
 		return res;
 	}
-	
+
 }
