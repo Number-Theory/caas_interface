@@ -48,7 +48,7 @@
 	
 	<update id="updateRateDeductionUnit">
 		update tb_caas_phonenumber t set t.employUnit = t.employUnit+#{deductionUtit},t.reSidueUnit = t.reSidueUnit-#{reSidueUnit} 
-		where t.id=#{rateId} and t.productType=#{productType} and t.userId=#{userId};
+		where t.phoneNumber=#{phoneNumber} and t.productType=#{productType} and t.userId=#{userId};
 	</update>
 	
 	<select id="getNumByUserIdAndProductType" resultType="map">

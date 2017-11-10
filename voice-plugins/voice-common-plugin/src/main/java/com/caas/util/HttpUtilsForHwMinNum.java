@@ -118,7 +118,8 @@ public class HttpUtilsForHwMinNum
             IOUtils.closeQuietly(in);
             if (null != connection)
             {
-                IOUtils.close(connection);
+//                IOUtils.close(connection);
+            	connection = null;
             }
         }
 
@@ -180,7 +181,8 @@ public class HttpUtilsForHwMinNum
             IOUtils.closeQuietly(in);
             if (null != connection)
             {
-                IOUtils.close(connection);
+//                IOUtils.close(connection);
+            	connection = null;
             }
         }
         return result.toString();
@@ -260,7 +262,8 @@ public class HttpUtilsForHwMinNum
 
             if (null != connection)
             {
-                IOUtils.close(connection);
+//                IOUtils.close(connection);
+            	connection = null;
             }
         }
 
