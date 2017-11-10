@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="control/minNumBindAX" displayName="东信AX绑定接口" activator="com.caas.service.minNum.MinNumBindAXService"/>

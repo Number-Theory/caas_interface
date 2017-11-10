@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="{version}/voice/axb/bind/{userId}" displayName="AXB绑定接口"
-	activator="com.caas.service.BindAXBService" isAsync="true" />

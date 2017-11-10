@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<plugin id="httpAccess" displayName="Http接入" activator="com.yzx.access.plugin.HttpAccessPlugin" order="100" enable="true" failOnInitError="true"/>
