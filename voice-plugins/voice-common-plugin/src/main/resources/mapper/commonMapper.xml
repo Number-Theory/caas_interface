@@ -34,11 +34,11 @@
 	
 	<!-- 根据号码获取费率 -->
 	<select id="getNumberRate" resultType="map">
-		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} limit 1)
+		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} limit 1)
 	</select>
 	
 	<select id="getNumberReSidueUnit" resultType="long">
-		select reSidueUnit from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} and n.userId=#{userId}
+		select reSidueUnit from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} and n.userId=#{userId}
 	</select>
 	
 	<select id="getNumInfomation" resultType="map">
@@ -48,11 +48,11 @@
 	
 	<update id="updateRateDeductionUnit">
 		update tb_caas_phonenumber t set t.employUnit = t.employUnit+#{deductionUtit},t.reSidueUnit = t.reSidueUnit-#{reSidueUnit} 
-		where t.phoneNumber=#{phoneNumber} and t.productType=#{productType} and t.userId=#{userId};
+		where t.phoneNumber=#{phoneNumber} and t.serverProduct=#{productType} and t.userId=#{userId};
 	</update>
 	
 	<select id="getNumByUserIdAndProductType" resultType="map">
-		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.productType=#{productType} and t.phoneNumber=#{phoneNumber} and t.status='0'
+		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.serverProduct=#{productType} and t.phoneNumber=#{phoneNumber} and t.status='0'
 	</select>
 	
 	<insert id="insertBill">

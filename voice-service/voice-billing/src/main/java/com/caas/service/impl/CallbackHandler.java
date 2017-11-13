@@ -116,6 +116,8 @@ public class CallbackHandler extends DefaultBillingHandler {
 				}
 			}
 		}
+		callTime = callTime / 1000;
+		callTimeB = callTimeB / 1000;
 		deductionUnit = (callTime + billingUnit - 1) / billingUnit;
 		deductionUnitB = (callTimeB + billingUnit - 1) / billingUnit;
 
@@ -197,7 +199,7 @@ public class CallbackHandler extends DefaultBillingHandler {
 		bill.put("beginTime", billingModel.getBeginTime());
 		bill.put("endTime", billingModel.getEndTime());
 		bill.put("callType", billingModel.getCallType());
-		bill.put("callTime", billingModel.getCallTime());
+		bill.put("callTime", callTime);
 		bill.put("rateId", rateMap.get("id"));
 		bill.put("billingType", rateMap.get("billingType"));
 		bill.put("billingUnit", rateMap.get("billingUnit"));
@@ -212,7 +214,7 @@ public class CallbackHandler extends DefaultBillingHandler {
 		bill.put("beginTimeB", billingModel.getBeginTimeB());
 		bill.put("endTimeB", billingModel.getEndTimeB());
 		bill.put("callTypeB", billingModel.getCallTypeB());
-		bill.put("callTimeB", billingModel.getCallTimeB());
+		bill.put("callTimeB", callTimeB);
 		bill.put("callPriceB", callPriceB); // 费率
 		bill.put("deductionUnitB", deductionUnitB); // 计费单元
 		bill.put("cdrTypeB", cdrTypeB); // 扣费类型，0：套餐内，1：套餐外

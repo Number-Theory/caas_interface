@@ -59,26 +59,10 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 		String callerCity = NumberUtils.getMobileAttribution(caller), calledCity = NumberUtils.getMobileAttribution(billingModel.getCalled());
 		Long callPrice = 0L, callPriceB = 0L, deductionUnit = 0L, deductionUnitB = 0L;
 		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
-		if ("0".equals(billingType)) { // A路B路分开计费
-			if ("0".equals(billingModel.getCallStatus())) { // A路
-				callTime = billingModel.getCallTime();
-				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
-					callPrice = (Long) rateMap.get("iddPrice");
-					billingModel.setCallType("2");
-				} else {
-					if (callerCity.equals(calledCity)) { // 市话
-						callPrice = (Long) rateMap.get("localPrice");
-						billingModel.setCallType("0");
-					} else { // 长途
-						callPrice = (Long) rateMap.get("dddPrice");
-						billingModel.setCallType("1");
-					}
-				}
-			}
-		} else if ("1".equals(billingType)) {// 按次扣费
+		if ("3".equals(billingType)) {// 按次扣费
 			callTime = billingModel.getCallTime();
 			callPrice = (Long) rateMap.get("oncePrice");
-		} else if ("2".equals(billingType)) {// 按B路时长扣费
+		} else {// 按时长扣费
 			callTime = billingModel.getCallTime();
 			if ("0".equals(billingModel.getCallStatus())) { // A路
 				callTime = billingModel.getCallTime();
@@ -96,6 +80,7 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 				}
 			}
 		}
+		callTime = callTime / 1000;
 		deductionUnit = (callTime + billingUnit - 1) / billingUnit;
 
 		Long recordPrice = 0L, recordPayMoney = 0L;
@@ -155,7 +140,7 @@ public class VoiceCodeHandler extends DefaultBillingHandler {
 		bill.put("beginTime", billingModel.getBeginTime());
 		bill.put("endTime", billingModel.getEndTime());
 		bill.put("callType", billingModel.getCallType());
-		bill.put("callTime", billingModel.getCallTime());
+		bill.put("callTime", callTime);
 		bill.put("rateId", rateMap.get("id"));
 		bill.put("billingType", rateMap.get("billingType"));
 		bill.put("billingUnit", rateMap.get("billingUnit"));

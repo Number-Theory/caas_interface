@@ -59,6 +59,11 @@
 			<artifactId>voice-code-rest</artifactId>
 			<version>${caas.service.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yzx.biz</groupId>
+			<artifactId>voice-clickcall-rest</artifactId>
+			<version>${caas.service.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
