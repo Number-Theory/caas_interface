@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="voice/clickcall/huaweistatus" displayName="华为状态回调接口"
+	activator="com.caas.service.callback.clickcall.HuaweiClickcallStatusService" />

@@ -71,7 +71,7 @@ public class VoiceNotifyBill4ZHService extends DefaultServiceCallBack {
 		billingModel.setCallTime(callTime);
 		billingModel.setEndTime(bill.getEndtime());
 		billingModel.setEvent("3");
-		billingModel.setProductType("3");
+		billingModel.setProductType("4");
 		billingModel.setRealityNumber(voiceNotifyModel.getCaller());
 		billingModel.setRecordType("1");
 		billingModel.setRecordUrl("");

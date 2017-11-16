@@ -75,17 +75,17 @@ public class GxAXBService extends DefaultServiceCallBack implements BaseAXBServi
 			Map<String, String> orderRecordMapOld = RedisOpClient.hgetall(orderRecordKeyOld[0]);
 			subid[0] = orderRecordMapOld.get("subid");
 
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateAXB" + "/" + subid[0];
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateAXB";
 		} else if (calleeBindIdMapOld != null && !calleeBindIdMapOld.isEmpty()) {// 如果选取的被叫和中间号存在绑定关系，置换主被叫，绑定更新接口
 
-			String bindIdOld = callerBindIdMapOld.get("bindId");
+			String bindIdOld = calleeBindIdMapOld.get("bindId");
 			orderRecordKeyOld[0] = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, bindIdOld);
 			Map<String, String> orderRecordMapOld = RedisOpClient.hgetall(orderRecordKeyOld[0]);
 			subid[0] = orderRecordMapOld.get("subid");
 
 			gxInfo.setTelA(safetyCallModel.getCallee());
 			gxInfo.setTelB(safetyCallModel.getCaller());
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateAXB" + "/" + subid[0];
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateAXB";
 		} else { // 绑定接口
 			gxInfo.setTelX(safetyCallModel.getDstVirtualNum());
 		}

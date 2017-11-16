@@ -159,9 +159,17 @@ public class BindAXService extends DefaultServiceCallBack {
 					}.getType());
 					if (BusiErrorCode.B_000000.getErrCode().equals(authResponse.getResult())) {
 
-						String className = "com.caas.service.impl.GxAXService";// TODO
-						BaseAXService axbService = new GxAXService();
-						axbService.axBind(callId, minNumModel, ctx, request, response);
+						String className = "com.caas.service.impl.HWAXService";// TODO
+						BaseAXService axService = new GxAXService();
+						try {
+							axService = (BaseAXService) Class.forName(className).newInstance();
+						} catch (Exception e) {
+							logger.error("className=[" + className + "]实例化失败，", e);
+							setResponse(callId, response, BusiErrorCode.B_100025, REST_EVENT, minNumModel.getUserData());
+							HttpUtils.sendMessageJson(ctx, response.toString());
+							return;
+						}
+						axService.axBind(callId, minNumModel, ctx, request, response);
 						RedisOpClient.set(RedisKeyConsts.getKey("apiServer:", bindId), className);
 
 					} else {

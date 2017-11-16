@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="control/voiceNotify4ZH" displayName="ZH语音通知接口"
-	activator="com.caas.service.voiceNotify.VoiceNotify4ZHService" isAsync="true" />

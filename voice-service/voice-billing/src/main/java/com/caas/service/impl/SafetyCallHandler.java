@@ -10,6 +10,7 @@ import com.caas.dao.CaasDao;
 import com.caas.model.BillingModel;
 import com.caas.util.NumberUtils;
 import com.yzx.auth.plugin.SpringContext;
+import com.yzx.core.util.DateUtil;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceResponse;
 
@@ -37,12 +38,20 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		params.put("phoneNumber", callee);
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
-		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
+		Map<String, Object> rateMap = dao.selectOne("common.getNumberRateUserId", params);
 		boolean flag = true;
+		String selectPhoneNumber = callee;
 		if (rateMap == null || rateMap.isEmpty()) {
-			logger.info("获取号码套餐失败，查询默认套餐！");
-			params.put("phoneNumber", "0");
+			logger.info("获取号码套餐失败，查询用户默认套餐！");
+			params.put("phoneNumber", userId);
+			selectPhoneNumber = userId;
 			rateMap = dao.selectOne("common.getNumberRate", params);
+			if (rateMap == null || rateMap.isEmpty()) {
+				logger.info("获取用户套餐失败，查询默认套餐！");
+				selectPhoneNumber = "0";
+				params.put("phoneNumber", "0");
+				rateMap = dao.selectOne("common.getNumberRate", params);
+			}
 			flag = false;
 		}
 		logger.info("查询到的套餐为[{}]", rateMap);
@@ -123,6 +132,8 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 				}
 			}
 		}
+		callTime = callTime / 1000;
+		callTimeB = callTimeB / 1000;
 		deductionUnit = (callTime + billingUnit - 1) / billingUnit;
 		deductionUnitB = (callTimeB + billingUnit - 1) / billingUnit;
 
@@ -135,45 +146,49 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		Long gratisUnit = 0L;
 		if (flag) {
 			Map<String, Object> sqlParams = new HashMap<String, Object>();
-			sqlParams.put("phoneNumber", callee);
+			sqlParams.put("phoneNumber", selectPhoneNumber);
 			sqlParams.put("productType", billingModel.getProductType());
 			sqlParams.put("userId", billingModel.getUserId());
 			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);
 		}
 		String cdrType = "1";
-		if (gratisUnit >= deductionUnit) {
+		if (gratisUnit >= deductionUnit && deductionUnit != 0) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnit) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = deductionUnit - gratisUnit;
 		}
 
 		String cdrTypeB = "1";
-		if (gratisUnit >= deductionUnitB) {
+		if (gratisUnit >= deductionUnitB && deductionUnitB != 0) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnitB);
-			rateParams.put("rateId", rateMap.get("id"));
-			dao.update("common.updateRateDeductionUnit", deductionUnitB);
+			rateParams.put("phoneNumber", selectPhoneNumber);
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrTypeB = "0";
 			deductionUnitB = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnitB) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
-			rateParams.put("rateId", rateMap.get("id"));
-			dao.update("common.updateRateDeductionUnit", deductionUnitB);
+			rateParams.put("phoneNumber", selectPhoneNumber);
+			rateParams.put("productType", billingModel.getProductType());
+			rateParams.put("userId", billingModel.getUserId());
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrTypeB = "0";
 			deductionUnitB = deductionUnitB - gratisUnit;
 		}
@@ -200,7 +215,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		bill.put("beginTime", billingModel.getBeginTime());
 		bill.put("endTime", billingModel.getEndTime());
 		bill.put("callType", billingModel.getCallType());
-		bill.put("callTime", billingModel.getCallTime());
+		bill.put("callTime", callTime);
 		bill.put("rateId", rateMap.get("id"));
 		bill.put("billingType", rateMap.get("billingType"));
 		bill.put("billingUnit", rateMap.get("billingUnit"));
@@ -215,7 +230,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		bill.put("beginTimeB", billingModel.getBeginTimeB());
 		bill.put("endTimeB", billingModel.getEndTimeB());
 		bill.put("callTypeB", billingModel.getCallTypeB());
-		bill.put("callTimeB", billingModel.getCallTimeB());
+		bill.put("callTimeB", callTimeB);
 		bill.put("callPriceB", callPriceB); // 费率
 		bill.put("deductionUnitB", deductionUnitB); // 计费单元
 		bill.put("cdrTypeB", cdrTypeB); // 扣费类型，0：套餐内，1：套餐外
@@ -223,7 +238,8 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		bill.put("recordPayMoney", recordPayMoney);// 录音费用
 		bill.put("payMoney", payMoney);// 总费用
 		bill.put("deductionStatus", "1");
-
+		
+		bill.put("nowDate", DateUtil.getNow("yyyyMMdd"));
 		dao.insert("common.insertBill", bill);
 		// 设置响应值
 		response.getOtherMap().putAll(JsonUtil.jsonStrToMap(JsonUtil.toJsonStr(billingModel)));

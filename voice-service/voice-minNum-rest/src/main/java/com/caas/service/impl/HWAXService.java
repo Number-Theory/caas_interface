@@ -3,8 +3,6 @@ package com.caas.service.impl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponse;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,11 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.caas.dao.CaasDao;
-import com.caas.model.GxInfo;
 import com.caas.model.HuaweiBindInfo;
 import com.caas.model.MinNumModel;
 import com.caas.service.BaseAXService;
-import com.caas.util.CommonUtils;
 import com.google.gson.reflect.TypeToken;
 import com.yzx.access.callback.ClientHandler;
 import com.yzx.access.client.HttpClient1;
@@ -47,7 +43,7 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 
 	@Override
 	public void axBind(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response) {
-
+		minNumModel.setMaxAge("-1");
 		String userData = minNumModel.getUserData();
 		// 虚拟号码
 		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, minNumModel.getDstVirtualNum());
@@ -63,18 +59,21 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 		huaweiBindInfo.setRequestId(callId);
 		huaweiBindInfo.setaParty(minNumModel.getCaller());
 		huaweiBindInfo.setVirtualNumber(minNumModel.getDstVirtualNum());
-		SimpleDateFormat sdDateFormat1 = new SimpleDateFormat("yyyyMMddHHmmssFFF");
 		huaweiBindInfo.setIsRecord(minNumModel.getRecord());
 		huaweiBindInfo.setCalledNumDisplay(changeCallDispaly(minNumModel));
-		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumBindAX";
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumBindHwAX";
 		try {
 			new HttpClient1(new ClientHandler() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void execute(HttpResponse response, String context) {
-					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
 					Log4jUtils.initLog4jContext(request.getLogId());
 					ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
+					Map<String, Object> resultMap = null;
+					if (JsonUtil.jsonStrToMap(context).containsKey("apiRes")) {
+						resultMap = (Map<String, Object>) JsonUtil.jsonStrToMap(context).get("apiRes");
+					}
 					if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
 							&& (resultMap != null && resultMap.containsKey("code") && "000000".equals(String.valueOf(resultMap.get("code"))))) {
 						Map<String, String> calleeBindIdMap = new HashMap<String, String>();
@@ -118,7 +117,7 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 						}
 						orderRecordMap.put("cityId", minNumModel.getCityId());
 						orderRecordMap.put("productType", "1");
-						orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("data")).get("subid")));
+						orderRecordMap.put("subid", (String) (((Map<String, Object>) resultMap.get("result")).get("subscriptionId")));
 						orderRecordMap.put("userData", ObjectUtils.defaultIfNull(minNumModel.getUserData(), ""));
 						String orderRes = RedisOpClient.hmset(orderRecordKey, orderRecordMap, Integer.valueOf(minNumModel.getMaxAge()));
 						logger.info("【AX号码绑定】订单记录哈希表插入订单记录orderRes={},orderRecordKey={},orderRecordMap={},maxAge={}", orderRes, orderRecordKey, orderRecordMap,
@@ -169,16 +168,21 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, dstVirtualNum);
 		final HuaweiBindInfo huaweiBindInfo = new HuaweiBindInfo();
 		huaweiBindInfo.setSubscriptionId(subid);
+		huaweiBindInfo.setType("2");
 
-		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumUnbindAX"; // TODO
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/minNumUnbindHwAX";
 		try {
 			new HttpClient1(new ClientHandler() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void execute(HttpResponse response, String context) {
-					Map<String, Object> resultMap = JsonUtil.jsonStrToMap(context);
 					Log4jUtils.initLog4jContext(request.getLogId());
 					ServiceResponse controlResponse = JsonUtil.fromJson(context, new TypeToken<ServiceResponse>() {
 					}.getType());
+					Map<String, Object> resultMap = null;
+					if (JsonUtil.jsonStrToMap(context).containsKey("apiRes")) {
+						resultMap = (Map<String, Object>) JsonUtil.jsonStrToMap(context).get("apiRes");
+					}
 					if (BusiErrorCode.B_000000.getErrCode().equals(controlResponse.getResult())
 							&& (resultMap != null && resultMap.containsKey("code") && "000000".equals(String.valueOf(resultMap.get("code"))))) {
 
@@ -220,16 +224,43 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 			HttpUtils.sendMessageJson(ctx, response.toString());
 		}
 	}
+
 	/**
 	 * 将本平台ax显号方式转换为华为对应的显号方式 0 显示虚拟号码x 1显示被叫号码B
+	 * 
 	 * @return
 	 */
-	public String changeCallDispaly(MinNumModel model){
-		if (model.getCalldisplay()!=null &&!"".equals(model.getCalldisplay())) {
+	public String changeCallDispaly(MinNumModel model) {
+		if ("0".equals(model.getCalldisplay())) {
 			return "1";
-		}else{
+		} else if ("1".equals(model.getCalldisplay())) {
 			return "0";
 		}
-		
+		return "1";
+	}
+
+	@Override
+	public void onlineCall(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response) {
+		String orderRecordKey = RedisKeyConsts.getKey(RedisKeyConsts.ORDERBINDS, minNumModel.getBindId());
+		Map<String, String> orderRecordMap = RedisOpClient.hgetall(orderRecordKey);
+		if (orderRecordMap == null || orderRecordMap.isEmpty()) {
+			setResponse(callId, response, BusiErrorCode.B_100027, REST_EVENT, minNumModel.getUserData());
+			HttpUtils.sendMessageJson(ctx, response.toString());
+			return;
+		}
+
+		String dstVirtualNum = orderRecordMap.get("dstVirtualNum");
+		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, dstVirtualNum);
+		RedisOpClient.hset(calleeNumBindKey, "callee", minNumModel.getCallee());
+		logger.info("【AX号码绑闭】绑闭callerNumBindKey={}", calleeNumBindKey);
+
+		RedisOpClient.hset(orderRecordKey, "callee", minNumModel.getCallee());
+		logger.info("【AX号码绑闭】订单关系callerNumBindKey={}", calleeNumBindKey);
+
+		// TODO 订单状态更新
+
+		response.getOtherMap().put("bindId", minNumModel.getBindId());
+		response.getOtherMap().put("userData", minNumModel.getUserData());
+		HttpUtils.sendMessageJson(ctx, response.toString());
 	}
 }

@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="control/voiceCodeBill4ZH" displayName="ZH语音验证码回调接口"
-	activator="com.caas.service.callback.voiceCode.VoiceCodeBill4ZHService" />

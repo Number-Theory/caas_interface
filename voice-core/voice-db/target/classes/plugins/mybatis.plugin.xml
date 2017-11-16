@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<plugin id="mybatis" displayName="mybatis数据库插件" activator="com.yzx.db.plugin.MybatisPlugin" order="10" enable="false" failOnInitError="true"/>

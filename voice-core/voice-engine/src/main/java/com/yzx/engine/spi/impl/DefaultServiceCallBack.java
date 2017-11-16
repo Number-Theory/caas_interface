@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
@@ -59,7 +60,7 @@ public class DefaultServiceCallBack implements ServiceCallBackPoint {
 		response.setUserData(userData);
 	}
 
-	public String addMobileNationPrefix(String mobile) {
+	public String addPlus86MobileNationPrefix(String mobile) {
 		if (StringUtil.isBlank(mobile)) {
 			return "";
 		} else {
@@ -67,6 +68,17 @@ public class DefaultServiceCallBack implements ServiceCallBackPoint {
 				mobile = mobile.substring(1);
 			}
 			return "+86" + mobile;
+		}
+	}
+
+	public String add86MobileNationPrefix(String mobile) {
+		if (StringUtil.isBlank(mobile)) {
+			return "";
+		} else {
+			while (mobile.startsWith("0")) {
+				mobile = mobile.substring(1);
+			}
+			return "86" + mobile;
 		}
 	}
 
@@ -96,6 +108,14 @@ public class DefaultServiceCallBack implements ServiceCallBackPoint {
 		localFormater.setTimeZone(TimeZone.getDefault());
 		String localTime = localFormater.format(gpsUTCDate.getTime());
 		return localTime;
+	}
+
+	public static String getUtcTime(int second) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.SECOND, second);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf.format(calendar.getTime());
 	}
 
 }

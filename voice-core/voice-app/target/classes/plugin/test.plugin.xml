@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<plugin id="test" displayName="测试插件" activator="com.yzx.auth.plugin.TestPlugin" order="1" enable="false" failOnInitError="true"/>

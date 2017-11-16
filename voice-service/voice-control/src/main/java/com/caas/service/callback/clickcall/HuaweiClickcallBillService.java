@@ -92,12 +92,12 @@ public class HuaweiClickcallBillService extends DefaultServiceCallBack {
 				}
 				billingModel.setCallID(clickCallModel.getCallId());
 				Long callTime = 0L, callTimeB = 0L;
-				if ("31".equals(feeInfo.getCallOutUnaswRsn())) {
+				if ("31".equals(feeInfo.getCallOutUnaswRsn()) || "0".equals(feeInfo.getCallOutUnaswRsn())) {
 					billingModel.setCallStatus("0");
 				} else {
 					billingModel.setCallStatus("1");
 				}
-				if ("31".equals(feeInfo.getFwdUnaswRsn())) {
+				if ("31".equals(feeInfo.getFwdUnaswRsn()) || "0".equals(feeInfo.getFwdUnaswRsn())) {
 					billingModel.setCallStatusB("0");
 				} else {
 					billingModel.setCallStatusB("1");
@@ -157,7 +157,7 @@ public class HuaweiClickcallBillService extends DefaultServiceCallBack {
 					clickCallBillModel.setBeginTimeB(billingModel.getBeginTimeB());
 					clickCallBillModel.setRecord(clickCallModel.getRecord());
 					if (StringUtil.isNotEmpty(feeInfo.getFwdUnaswRsn())) {
-						if ("31".equals(feeInfo.getCallOutUnaswRsn())) { // 正常呼叫拆线
+						if ("31".equals(feeInfo.getCallOutUnaswRsn()) || "0".equals(feeInfo.getCallOutUnaswRsn())) { // 正常呼叫拆线
 							clickCallBillModel.setCallStatusA("0");
 						} else if ("17".equals(feeInfo.getCallOutUnaswRsn())) { // 用户忙
 							clickCallBillModel.setCallStatusA("2");
@@ -176,7 +176,7 @@ public class HuaweiClickcallBillService extends DefaultServiceCallBack {
 						clickCallBillModel.setCallStatusA("7");
 					}
 					if (StringUtil.isNotEmpty(feeInfo.getFwdUnaswRsn())) {
-						if ("31".equals(feeInfo.getFwdUnaswRsn())) { // 正常呼叫拆线
+						if ("31".equals(feeInfo.getFwdUnaswRsn()) || "0".equals(feeInfo.getFwdUnaswRsn())) { // 正常呼叫拆线
 							clickCallBillModel.setCallStatusB("0");
 						} else if ("17".equals(feeInfo.getFwdUnaswRsn())) { // 用户忙
 							clickCallBillModel.setCallStatusB("2");

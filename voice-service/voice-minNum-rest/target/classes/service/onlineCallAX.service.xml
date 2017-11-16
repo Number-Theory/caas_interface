@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="{version}/caas/onlinecallax/{userId}" displayName="AX绑闭接口"
-	activator="com.caas.service.OnlineCallAXService" isAsync="true" />

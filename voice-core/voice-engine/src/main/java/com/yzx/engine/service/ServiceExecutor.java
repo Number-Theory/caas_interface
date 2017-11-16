@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.yzx.auth.plugin.SpringContext;
+import com.yzx.core.consts.EnumType.BusiErrorCode;
 import com.yzx.core.consts.EnumType.SysErrorCode;
 import com.yzx.core.util.ClassUtils;
 import com.yzx.engine.model.ServiceRequest;
@@ -45,6 +46,8 @@ public class ServiceExecutor {
 				Class<?> type = ClassUtils.classForName(serviceConfWrapper.getServiceConf().getActivator());
 				ServiceCallBackPoint serviceCallBackPoint = SpringContext.getInstance(type);
 				try {
+					serviceResponse.setResult(BusiErrorCode.B_000000.getErrCode());
+					serviceResponse.setMessage(BusiErrorCode.B_000000.getErrMsg());
 					serviceCallBackPoint.beforeService(ctx, serviceRequest, serviceResponse, serviceRequest.getParamsObject());
 					serviceCallBackPoint.callService(ctx, serviceRequest, serviceResponse, serviceRequest.getParamsObject());
 					serviceCallBackPoint.successService(ctx, serviceRequest, serviceResponse, serviceRequest.getParamsObject());

@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<service id="voiceAuth/caasCalls" displayName="鉴权接口" activator="com.caas.service.AuthService"/>

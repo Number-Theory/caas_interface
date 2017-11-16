@@ -10,6 +10,7 @@ import com.caas.dao.CaasDao;
 import com.caas.model.BillingModel;
 import com.caas.util.NumberUtils;
 import com.yzx.auth.plugin.SpringContext;
+import com.yzx.core.util.DateUtil;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceResponse;
 
@@ -35,12 +36,20 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 		params.put("phoneNumber", caller);
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
+		String selectPhoneNumber = caller;
 		boolean flag = true;
-		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
+		Map<String, Object> rateMap = dao.selectOne("common.getNumberRateUserId", params);
 		if (rateMap == null || rateMap.isEmpty()) {
-			logger.info("获取号码套餐失败，查询默认套餐！");
-			params.put("phoneNumber", "0");
+			logger.info("获取号码套餐失败，查询用户默认套餐！");
+			params.put("phoneNumber", userId);
+			selectPhoneNumber = userId;
 			rateMap = dao.selectOne("common.getNumberRate", params);
+			if (rateMap == null || rateMap.isEmpty()) {
+				logger.info("获取用户套餐失败，查询默认套餐！");
+				selectPhoneNumber = "0";
+				params.put("phoneNumber", "0");
+				rateMap = dao.selectOne("common.getNumberRate", params);
+			}
 			flag = false;
 		}
 		logger.info("查询到的套餐为[{}]", rateMap);
@@ -51,26 +60,11 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 		String callerCity = NumberUtils.getMobileAttribution(caller), calledCity = NumberUtils.getMobileAttribution(billingModel.getCalled());
 		Long callPrice = 0L, callPriceB = 0L, deductionUnit = 0L, deductionUnitB = 0L;
 		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
-		if ("0".equals(billingType)) { // A路B路分开计费
-			if ("0".equals(billingModel.getCallStatus())) { // A路
-				callTime = billingModel.getCallTime();
-				if (NumberUtils.isInternationalPhone(billingModel.getCaller())) { // 国际电话
-					callPrice = (Long) rateMap.get("iddPrice");
-					billingModel.setCallType("2");
-				} else {
-					if (callerCity.equals(calledCity)) { // 市话
-						callPrice = (Long) rateMap.get("localPrice");
-						billingModel.setCallType("0");
-					} else { // 长途
-						callPrice = (Long) rateMap.get("dddPrice");
-						billingModel.setCallType("1");
-					}
-				}
-			}
-		} else if ("1".equals(billingType)) {// 按次扣费
+
+		if ("3".equals(billingType)) {// 按次扣费
 			callTime = billingModel.getCallTime();
 			callPrice = (Long) rateMap.get("oncePrice");
-		} else if ("2".equals(billingType)) {// 按B路时长扣费
+		} else {// 按时长扣费
 			callTime = billingModel.getCallTime();
 			if ("0".equals(billingModel.getCallStatus())) { // A路
 				callTime = billingModel.getCallTime();
@@ -88,6 +82,7 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 				}
 			}
 		}
+		callTime = callTime / 1000;
 		deductionUnit = (callTime + billingUnit - 1) / billingUnit;
 
 		Long recordPrice = 0L, recordPayMoney = 0L;
@@ -99,28 +94,28 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 		Long gratisUnit = 0L;
 		if (flag) {
 			Map<String, Object> sqlParams = new HashMap<String, Object>();
-			sqlParams.put("phoneNumber", caller);
+			sqlParams.put("phoneNumber", selectPhoneNumber);
 			sqlParams.put("productType", billingModel.getProductType());
 			sqlParams.put("userId", billingModel.getUserId());
 			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);
 		}
 		String cdrType = "1";
-		if (gratisUnit >= deductionUnit) {
+		if (gratisUnit >= deductionUnit && deductionUnit != 0) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnit) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", gratisUnit);
-			rateParams.put("rateId", rateMap.get("id"));
+			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = deductionUnit - gratisUnit;
 		}
@@ -147,7 +142,7 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 		bill.put("beginTime", billingModel.getBeginTime());
 		bill.put("endTime", billingModel.getEndTime());
 		bill.put("callType", billingModel.getCallType());
-		bill.put("callTime", billingModel.getCallTime());
+		bill.put("callTime", callTime);
 		bill.put("rateId", rateMap.get("id"));
 		bill.put("billingType", rateMap.get("billingType"));
 		bill.put("billingUnit", rateMap.get("billingUnit"));
@@ -171,6 +166,7 @@ public class VoiceNotifyHandler extends DefaultBillingHandler {
 		bill.put("payMoney", payMoney);// 总费用
 		bill.put("deductionStatus", "1");
 
+		bill.put("nowDate", DateUtil.getNow("yyyyMMdd"));
 		dao.insert("common.insertBill", bill);
 		// 设置响应值
 		response.getOtherMap().putAll(JsonUtil.jsonStrToMap(JsonUtil.toJsonStr(billingModel)));

@@ -19,6 +19,15 @@ public class DeductionModel extends BaseModel {
 	private String deductionCode;
 	private Long deductionMoney;
 	private String userData;
+	private String nowDate;
+
+	public String getNowDate() {
+		return nowDate;
+	}
+
+	public void setNowDate(String nowDate) {
+		this.nowDate = nowDate;
+	}
 
 	public String getEvent() {
 		return event;

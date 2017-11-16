@@ -1,3 +1,0 @@
-Usage: voice start <app>
-Parameters:
-     <app>           应用名称

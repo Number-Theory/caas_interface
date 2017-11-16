@@ -29,16 +29,20 @@
 	</update>
 	
 	<update id="updateDeductionStatus">
-		update tb_caas_cdr set deductionStatus='0' where userId=#{userId} and callId=#{callId};
+		update tb_caas_cdr_${nowDate} set deductionStatus='0' where userId=#{userId} and callId=#{callId};
 	</update>
 	
 	<!-- 根据号码获取费率 -->
+	<select id="getNumberRateUserId" resultType="map">
+		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} and n.userId = #{userId} limit 1)
+	</select>
+	
 	<select id="getNumberRate" resultType="map">
-		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} limit 1)
+		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} limit 1)
 	</select>
 	
 	<select id="getNumberReSidueUnit" resultType="long">
-		select reSidueUnit from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.productType=#{productType} and n.userId=#{userId}
+		select reSidueUnit from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} and n.userId=#{userId}
 	</select>
 	
 	<select id="getNumInfomation" resultType="map">
@@ -48,15 +52,15 @@
 	
 	<update id="updateRateDeductionUnit">
 		update tb_caas_phonenumber t set t.employUnit = t.employUnit+#{deductionUtit},t.reSidueUnit = t.reSidueUnit-#{reSidueUnit} 
-		where t.id=#{rateId} and t.productType=#{productType} and t.userId=#{userId};
+		where t.phoneNumber=#{phoneNumber} and t.serverProduct=#{productType} and t.userId=#{userId};
 	</update>
 	
 	<select id="getNumByUserIdAndProductType" resultType="map">
-		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.productType=#{productType} and t.phoneNumber=#{phoneNumber} and t.status='0'
+		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.serverProduct=#{productType} and t.phoneNumber=#{phoneNumber} and t.status='0'
 	</select>
 	
 	<insert id="insertBill">
-		INSERT INTO `tb_caas_cdr` (`userId`, `productType`, `callId`, `caller`, `callerCityCode`, `callerProvider`, 
+		INSERT INTO tb_caas_cdr_${nowDate} (`userId`, `productType`, `callId`, `caller`, `callerCityCode`, `callerProvider`, 
 		`callerDisplay`, `called`, `calledCityCode`, `calledProvider`, `calledDisplay`, `realityNumber`, `recordType`, 
 		`callStatus`, `beginTime`, `endTime`, `callType`, `callTime`, `rateId`, `billingType`, `billingUnit`, 
 		`callPrice`, `deductionUnit`, `cdrType`, `recordPrice`, `recordUrl`, `callStatusB`, `beginTimeB`, `endTimeB`, 

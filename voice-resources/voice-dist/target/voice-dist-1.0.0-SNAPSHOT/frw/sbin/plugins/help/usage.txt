@@ -1,4 +1,0 @@
-Usage: ltts help [? | <plugin>]
-Parameters:
-     ?                 显示全部子命令插件列表
-     <plugin>          显示指定子命令插件说明

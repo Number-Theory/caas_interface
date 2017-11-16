@@ -42,21 +42,21 @@ public class MinNumUnbindAXService extends DefaultServiceCallBack {
 		logger.info("【请求广西东信解绑接口参数】body={}", subid);
 
 		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("requestId", gxInfo.getRequestId());
-		param.put("telA", gxInfo.getTelA());
-		param.put("telB", gxInfo.getTelB());
-		param.put("subts", gxInfo.getSubts());
-		param.put("anucode", gxInfo.getAnucode());
-		param.put("areacode", gxInfo.getAreacode());
-		param.put("expiration", gxInfo.getExpiration());
-		Map<String, Object> extraMap = new HashMap<String, Object>();
-		extraMap.put("callrecording", gxInfo.getCallrecording());
-		param.put("extra", extraMap);
+//		param.put("requestId", gxInfo.getRequestId());
+//		param.put("telA", gxInfo.getTelA());
+//		param.put("telB", gxInfo.getTelB());
+//		param.put("subts", gxInfo.getSubts());
+//		param.put("anucode", gxInfo.getAnucode());
+//		param.put("areacode", gxInfo.getAreacode());
+//		param.put("expiration", gxInfo.getExpiration());
+//		Map<String, Object> extraMap = new HashMap<String, Object>();
+//		extraMap.put("callrecording", gxInfo.getCallrecording());
+//		param.put("extra", extraMap);
 
 		String body = JsonUtil.toJsonStr(param);
 
 		// 封装请求广西东信的接口路径
-		String url = ConfigUtils.getProperty("baseUrl_gx", String.class) + ConfigUtils.getProperty("bindNumberUrl_gx_ax", String.class) + "/" + subid;
+		String url = ConfigUtils.getProperty("baseUrl_gx", String.class) + ConfigUtils.getProperty("unbindNumberUrl_gx_ax", String.class) + "/" + subid;
 		logger.info("【请求广西东信解绑接口路径】url={}", url);
 
 		// 请求东信解除绑定接口

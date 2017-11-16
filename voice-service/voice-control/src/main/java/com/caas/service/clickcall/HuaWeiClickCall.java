@@ -43,18 +43,18 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 		// huaWeiClickcallModel.setAccessToken(accessToken);
 		// huaWeiClickcallModel.setAppKey(appKey);
 		huaWeiClickcallModel.setBindNbr("+862869514469");
-		huaWeiClickcallModel.setCalleeNbr(addMobileNationPrefix(clickCallModel.getCalled()));
-		huaWeiClickcallModel.setCallerNbr(addMobileNationPrefix(clickCallModel.getCaller()));
+		huaWeiClickcallModel.setCalleeNbr(addPlus86MobileNationPrefix(clickCallModel.getCalled()));
+		huaWeiClickcallModel.setCallerNbr(addPlus86MobileNationPrefix(clickCallModel.getCaller()));
 		if (StringUtil.isNotEmpty(clickCallModel.getDisplayCalled())) {
-			huaWeiClickcallModel.setDisplayCalleeNbr(addMobileNationPrefix(clickCallModel.getDisplayCalled()));
+			huaWeiClickcallModel.setDisplayCalleeNbr(addPlus86MobileNationPrefix(clickCallModel.getDisplayCalled()));
 		}
 		if (StringUtil.isNotEmpty(clickCallModel.getDisplayCaller())) {
-			huaWeiClickcallModel.setDisplayNbr(addMobileNationPrefix(clickCallModel.getDisplayCaller()));
+			huaWeiClickcallModel.setDisplayNbr(addPlus86MobileNationPrefix(clickCallModel.getDisplayCaller()));
 		}
 		EncryptUtil encryptUtil = new EncryptUtil();
 		try {
-			huaWeiClickcallModel.setFeeUrl(encryptUtil.base64Encoder(clickCallModel.getBillUrl())); // TODO
-			huaWeiClickcallModel.setStatusUrl(encryptUtil.base64Encoder(clickCallModel.getStatusUrl())); // TODO
+			huaWeiClickcallModel.setFeeUrl(encryptUtil.base64Encoder(ConfigUtils.getProperty("hw_callback_bill", String.class)));
+			huaWeiClickcallModel.setStatusUrl(encryptUtil.base64Encoder(ConfigUtils.getProperty("hw_callback_status", String.class))); // TODO
 		} catch (Exception e) {
 		}
 		huaWeiClickcallModel.setMaxDuration(clickCallModel.getMaxDuration());
@@ -75,7 +75,7 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 		String respData = HttpUtilsForHw.postJSON(url + params, body);
 		logger.info("【请求华为点击呼叫接口路径】返回结果resp={}", respData);
 
-		if (null != respData && respData != "") {
+		if (StringUtil.isNotEmpty(respData)) {
 			JSONObject fromJson = JSONObject.parseObject(respData);
 
 			String resultcode = fromJson.getString("resultcode");

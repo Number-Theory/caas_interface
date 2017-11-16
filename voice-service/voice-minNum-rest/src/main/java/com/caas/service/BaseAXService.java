@@ -12,4 +12,6 @@ public interface BaseAXService extends Serializable {
 	public void axBind(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response);
 
 	public void axUnbind(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response);
+	
+	public void onlineCall(String callId, MinNumModel minNumModel, ChannelHandlerContext ctx, ServiceRequest request, ServiceResponse response);
 }
