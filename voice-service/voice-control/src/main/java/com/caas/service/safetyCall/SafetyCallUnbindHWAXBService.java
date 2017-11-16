@@ -63,7 +63,7 @@ public class SafetyCallUnbindHWAXBService extends DefaultServiceCallBack {
 		String body = JsonUtil.toJsonStr(param);
 
 		// 封装请求华为的接口路径
-		String url = ConfigUtils.getProperty("baseUrl_hw", String.class) + ConfigUtils.getProperty("unbindNumberUrl_hw_axb", String.class) + "/" + subid;
+		String url = ConfigUtils.getProperty("baseUrl_hw", String.class) + ConfigUtils.getProperty("unbindNumberUrl_hw_axb", String.class);
 		logger.info("【请求华为解绑接口路径】url={}", url);
 		String appKey = ConfigUtils.getProperty("appKey_hw", String.class)  ;
 		logger.info("【请求华为解绑接口路径】appKey={}", appKey);

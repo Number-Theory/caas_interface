@@ -854,6 +854,27 @@ public class DateUtil {
 	}
 	
 	/**
+	 * 日期加秒
+	 * @param date 需增加的日期
+	 * @param second 增加的秒
+	 * @return 返回yyyy-MM-dd HH:mm:ss
+	 */
+	public static String addSecond(String dateStr,int second) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String resDate = "";
+		try {
+			Date date = sdf.parse(dateStr);
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(getMillis(date)+second*1000);
+			resDate = sdf.format(c.getTime());
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return  resDate;
+	}
+	
+	/**
 	 * 返回日期毫秒
 	 * 
 	 * @param date
@@ -936,6 +957,50 @@ public class DateUtil {
 			timestamp = timestamp.substring(0, timestamp.length() - 3);
 		}
 		return timestamp;
+	}
+	/**
+	 * 
+	 * @param dateStr 时间字符串
+	 * @param format 时间格式
+	 * @return
+	 */
+	public static Date Str2Date(String dateStr, String format) {
+		if (StringUtil.isNotEmpty(dateStr)) {
+			if (format == null || format.isEmpty()) {
+				format = "yyyy-MM-dd HH:mm:ss";
+			}
+			SimpleDateFormat sdf = new SimpleDateFormat(format);
+			try {
+				Date date = sdf.parse(dateStr);
+				return date;
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @param dateStr 需转换的时间
+	 * @param oldFormat 原来的格式
+	 * @param newFormat 转换后的格式
+	 * @return
+	 */
+	public static String dateStr2Str(String dateStr,String oldFormat,String newFormat) {
+		String resDate = "";
+		if (StringUtil.isEmpty(dateStr)) 
+			return resDate;
+		SimpleDateFormat sdfOld = new SimpleDateFormat(oldFormat);
+		SimpleDateFormat sdfnew = new SimpleDateFormat(newFormat);
+	   try {
+			Date	OldDate = sdfOld.parse(dateStr);
+			resDate = sdfnew.format(OldDate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return resDate;
 	}
 	
 	public static void main(String[] args){

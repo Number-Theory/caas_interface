@@ -3,6 +3,8 @@ package com.yzx.core.consts;
 public class EnumType {
 	public static enum SysErrorCode {
 		S_000000("100000", "业务成功"), S_200000("200000", "指定的接口服务不存在"), S_900000("999999", "系统错误");
+		
+		
 
 		private String errCode;
 		private String errMsg;
