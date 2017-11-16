@@ -52,6 +52,7 @@ public class DeductionService extends DefaultServiceCallBack {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("userId", userId);
 			params.put("callId", deductionModel.getDeductionCode());
+			params.put("nowDate", deductionModel.getNowDate());
 			dao.update("common.updateDeductionStatus", params);
 		}
 		logger.info("更新扣费状态成功！");

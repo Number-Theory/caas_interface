@@ -29,10 +29,14 @@
 	</update>
 	
 	<update id="updateDeductionStatus">
-		update tb_caas_cdr set deductionStatus='0' where userId=#{userId} and callId=#{callId};
+		update tb_caas_cdr_${nowDate} set deductionStatus='0' where userId=#{userId} and callId=#{callId};
 	</update>
 	
 	<!-- 根据号码获取费率 -->
+	<select id="getNumberRateUserId" resultType="map">
+		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} and n.userId = #{userId} limit 1)
+	</select>
+	
 	<select id="getNumberRate" resultType="map">
 		select * from tb_caas_fee t where t.id = (select n.rateId from tb_caas_phonenumber n where n.phoneNumber=#{phoneNumber} and n.serverProduct=#{productType} limit 1)
 	</select>
@@ -56,7 +60,7 @@
 	</select>
 	
 	<insert id="insertBill">
-		INSERT INTO `tb_caas_cdr` (`userId`, `productType`, `callId`, `caller`, `callerCityCode`, `callerProvider`, 
+		INSERT INTO tb_caas_cdr_${nowDate} (`userId`, `productType`, `callId`, `caller`, `callerCityCode`, `callerProvider`, 
 		`callerDisplay`, `called`, `calledCityCode`, `calledProvider`, `calledDisplay`, `realityNumber`, `recordType`, 
 		`callStatus`, `beginTime`, `endTime`, `callType`, `callTime`, `rateId`, `billingType`, `billingUnit`, 
 		`callPrice`, `deductionUnit`, `cdrType`, `recordPrice`, `recordUrl`, `callStatusB`, `beginTimeB`, `endTimeB`, 

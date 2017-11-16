@@ -62,12 +62,13 @@ public class BillingService extends DefaultServiceCallBack {
 		// 对接扣费组件
 		DeductionModel deductionModel = new DeductionModel();
 		deductionModel.setDeductionCode(billingModel.getCallID());
-		deductionModel.setDeductionMoney((Long)response.getOtherMap().get("payMoney")); // 总金额
+		deductionModel.setDeductionMoney((Long) response.getOtherMap().get("payMoney")); // 总金额
 		deductionModel.setDeductionType("0");
 		deductionModel.setEvent(DEDUCTION_EVENT);
 		deductionModel.setProductType(productType);
 		deductionModel.setUserData(billingModel.getUserData());
 		deductionModel.setUserId(billingModel.getUserId());
+		deductionModel.setNowDate((String) response.getOtherMap().get("nowDate"));
 
 		String deductionUrl = ConfigUtils.getProperty("deductionUrl", String.class);
 		try {

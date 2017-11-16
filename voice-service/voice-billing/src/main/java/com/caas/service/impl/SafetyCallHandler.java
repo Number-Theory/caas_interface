@@ -10,6 +10,7 @@ import com.caas.dao.CaasDao;
 import com.caas.model.BillingModel;
 import com.caas.util.NumberUtils;
 import com.yzx.auth.plugin.SpringContext;
+import com.yzx.core.util.DateUtil;
 import com.yzx.core.util.JsonUtil;
 import com.yzx.engine.model.ServiceResponse;
 
@@ -37,7 +38,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		params.put("phoneNumber", callee);
 		params.put("productType", productType);
 		params.put("userId", billingModel.getUserId());
-		Map<String, Object> rateMap = dao.selectOne("common.getNumberRate", params);
+		Map<String, Object> rateMap = dao.selectOne("common.getNumberRateUserId", params);
 		boolean flag = true;
 		String selectPhoneNumber = callee;
 		if (rateMap == null || rateMap.isEmpty()) {
@@ -50,8 +51,8 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 				selectPhoneNumber = "0";
 				params.put("phoneNumber", "0");
 				rateMap = dao.selectOne("common.getNumberRate", params);
-				flag = false;
 			}
+			flag = false;
 		}
 		logger.info("查询到的套餐为[{}]", rateMap);
 
@@ -151,13 +152,13 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 			gratisUnit = dao.selectOne("common.getNumberReSidueUnit", sqlParams);
 		}
 		String cdrType = "1";
-		if (gratisUnit >= deductionUnit) {
+		if (gratisUnit >= deductionUnit && deductionUnit != 0) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
 			rateParams.put("deductionUnit", deductionUnit);
 			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnit) {
@@ -166,19 +167,19 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnit);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrType = "0";
 			deductionUnit = deductionUnit - gratisUnit;
 		}
 
 		String cdrTypeB = "1";
-		if (gratisUnit >= deductionUnitB) {
+		if (gratisUnit >= deductionUnitB && deductionUnitB != 0) {
 			Map<String, Object> rateParams = new HashMap<String, Object>();
-			rateParams.put("deductionUnit", gratisUnit);
+			rateParams.put("deductionUnit", deductionUnitB);
 			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnitB);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrTypeB = "0";
 			deductionUnitB = 0L;
 		} else if (gratisUnit > 0 && gratisUnit < deductionUnitB) {
@@ -187,7 +188,7 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 			rateParams.put("phoneNumber", selectPhoneNumber);
 			rateParams.put("productType", billingModel.getProductType());
 			rateParams.put("userId", billingModel.getUserId());
-			dao.update("common.updateRateDeductionUnit", deductionUnitB);
+			dao.update("common.updateRateDeductionUnit", rateParams);
 			cdrTypeB = "0";
 			deductionUnitB = deductionUnitB - gratisUnit;
 		}
@@ -237,7 +238,8 @@ public class SafetyCallHandler extends DefaultBillingHandler {
 		bill.put("recordPayMoney", recordPayMoney);// 录音费用
 		bill.put("payMoney", payMoney);// 总费用
 		bill.put("deductionStatus", "1");
-
+		
+		bill.put("nowDate", DateUtil.getNow("yyyyMMdd"));
 		dao.insert("common.insertBill", bill);
 		// 设置响应值
 		response.getOtherMap().putAll(JsonUtil.jsonStrToMap(JsonUtil.toJsonStr(billingModel)));
