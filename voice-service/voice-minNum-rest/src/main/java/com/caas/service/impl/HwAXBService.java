@@ -69,7 +69,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 
 		final String[] subid = { "" };
 		final String[] orderRecordKeyOld = { "" };
-		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindHWAXB";
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallBindHwAXB";
 		if (callerBindIdMapOld != null && !callerBindIdMapOld.isEmpty()) {// 如果选取的主叫和中间号存在绑定关系，绑定更新接口
 
 			String bindIdOld = callerBindIdMapOld.get("bindId");
@@ -82,7 +82,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 				safetyCallModel.setMaxAge(String.valueOf(ttl));
 			}
 
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB";
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHwAXB";
 		} else if (calleeBindIdMapOld != null && !calleeBindIdMapOld.isEmpty()) {// 如果选取的被叫和中间号存在绑定关系，置换主被叫，绑定更新接口
 
 			String bindIdOld = calleeBindIdMapOld.get("bindId");
@@ -97,7 +97,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 			if (ttl != -2 && ttl != -1) {
 				safetyCallModel.setMaxAge(String.valueOf(ttl));
 			}
-			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHWAXB";
+			controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUpdateHwAXB";
 		} else { // 绑定接口
 			HwBindInfo.setVirtualNumber(safetyCallModel.getDstVirtualNum());
 		}
@@ -240,7 +240,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 		HwBindInfo.setSubscriptionId(subid);
 		HwBindInfo.setRequestId(callId);
 
-		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnBindHWAXB";
+		String controlUrl = ConfigUtils.getProperty("caas_control_url", String.class) + "/control/safetyCallUnBindHwAXB";
 		try {
 			new HttpClient1(new ClientHandler() {
 				@SuppressWarnings("unchecked")

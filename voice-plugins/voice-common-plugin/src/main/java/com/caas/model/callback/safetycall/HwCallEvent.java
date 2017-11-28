@@ -1,6 +1,5 @@
 package com.caas.model.callback.safetycall;
 
-import java.util.Map;
 
 public class HwCallEvent {
 

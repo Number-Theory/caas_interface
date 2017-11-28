@@ -12,10 +12,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class JsonUtil {
 	public static String toJsonStr(Object obj) {
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		return gson.toJson(obj);
 	}
 
@@ -56,12 +57,12 @@ public class JsonUtil {
 		Gson gson = new Gson();
 		return gson.fromJson(num, o.getClass());
 	}
-	
+
 	public static <T> T fromJson(String num, Type o) {
 		Gson gson = new Gson();
 		return gson.fromJson(num, o);
 	}
-	
+
 	public static JSONObject toJsonObj(String str) throws JSONException {
 		JSONObject jb = JSONObject.parseObject(str);
 		return jb;

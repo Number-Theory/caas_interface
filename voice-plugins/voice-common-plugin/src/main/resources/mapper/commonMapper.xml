@@ -102,6 +102,10 @@
 		select * from tb_caas_bind_order t where t.subid = #{subid}
 	</select>
 	
+	<select id="getBindOrderByNumber" resultType="map">
+		select * from tb_caas_bind_order t where t.dstVirtualNum=#{virtualNumber} and t.bindStatus='0' and DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() limit 1
+	</select>
+	
 	<select id="getCallBackUrl" resultType="map">
 		select statusUrl,hangupUrl,recordUrl from tb_caas_application t where t.userId=#{userId} and t.productType=#{productType}
 	</select>

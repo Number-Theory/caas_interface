@@ -1,2 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service id="control/hwBillCallBack" displayName="华为Ax/AxB换单回调" activator="com.caas.service.callback.safetyCall.HwBillCallBackservice"/>
+<service id="voice/notifyCallEvent/v1" displayName="华为Ax/AxB换单回调"
+	activator="com.caas.service.callback.safetyCall.HwBillCallBackservice" />
