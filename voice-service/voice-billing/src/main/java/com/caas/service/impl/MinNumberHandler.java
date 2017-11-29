@@ -139,7 +139,7 @@ public class MinNumberHandler extends DefaultBillingHandler {
 		deductionUnitB = (callTimeB + billingUnit - 1) / billingUnit;
 
 		Long recordPrice = 0L, recordPayMoney = 0L;
-		if ("0".equals(billingModel.getRecordType())) {
+		if ("1".equals(billingModel.getRecordType())) {
 			recordPrice = (Long) rateMap.get("recordPrice");
 			recordPayMoney = recordPrice * deductionUnitB;
 		}

@@ -64,11 +64,11 @@ public class CallbackHandler extends DefaultBillingHandler {
 		Long billingUnit = Long.valueOf((String) rateMap.get("billingUnit"));
 		if ("0".equals(billingType)) { // A路B路分开计费
 			if ("0".equals(billingModel.getCallStatus())) { // A路
+				callTime = billingModel.getCallTime(); // 强显
 				if (NumberUtils.isInternationalPhone(caller)) { // 国际电话
 					callPriceB = (Long) rateMap.get("iddPrice");
 					billingModel.setCallTypeB("2");
 				} else {
-					callTime = billingModel.getCallTime(); // 强显
 					callPrice = (Long) rateMap.get("coercePrice");
 					billingModel.setCallType("3");
 				}
@@ -88,7 +88,7 @@ public class CallbackHandler extends DefaultBillingHandler {
 					}
 				}
 			}
-		} else if ("2".equals(billingType)) {// 按B路时长扣费
+		} else if ("1".equals(billingType)) {// 按B路时长扣费
 			if ("0".equals(billingModel.getCallStatusB())) { // B路
 				if ("0".equals(billingModel.getCallStatusB())) { // A路
 					callTime = billingModel.getCallTimeB();
@@ -96,7 +96,6 @@ public class CallbackHandler extends DefaultBillingHandler {
 						callPrice = (Long) rateMap.get("iddPrice");
 						billingModel.setCallType("2");
 					} else {
-						callTime = billingModel.getCallTime(); // 强显
 						callPrice = (Long) rateMap.get("coercePrice");
 						billingModel.setCallType("3");
 					}
@@ -123,7 +122,7 @@ public class CallbackHandler extends DefaultBillingHandler {
 		deductionUnitB = (callTimeB + billingUnit - 1) / billingUnit;
 
 		Long recordPrice = 0L, recordPayMoney = 0L;
-		if ("0".equals(billingModel.getRecordType())) {
+		if ("1".equals(billingModel.getRecordType())) {
 			recordPrice = (Long) rateMap.get("recordPrice");
 			recordPayMoney = recordPrice * deductionUnitB;
 		}
