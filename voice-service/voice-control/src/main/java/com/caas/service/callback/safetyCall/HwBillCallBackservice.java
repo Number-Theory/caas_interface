@@ -324,7 +324,7 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 				Map<String, Object> recordMap = new HashMap<String, Object>();
 				recordMap.put("callIdentifier", callIdentifier);
 				recordMap.put("recordUrl", recordUrl);
-				
+				recordMap.put("userData", String.valueOf(orderBindMap.get("userData")));
 			}
 		}
 	}

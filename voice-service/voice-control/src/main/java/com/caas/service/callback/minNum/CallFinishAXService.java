@@ -154,10 +154,10 @@ public class CallFinishAXService extends DefaultServiceCallBack {
 			recordCallback.put("recordUrl", finishModel.getRecordUrl());
 			recordCallback.put("userData", orderBindMap.get("userData"));
 			try {
-				HttpUtils.httpConnectionPost(billUrl, JsonUtil.toJsonStr(recordCallback));
-				logger.info("录音回调成功：{}", JsonUtil.toJsonStr(recordCallback));
+				HttpUtils.httpConnectionPost(billUrl, JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback));
+				logger.info("录音回调成功：{}", JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback));
 			} catch (Exception e) {
-				logger.error("录音回调失败：{}", JsonUtil.toJsonStr(recordCallback), e);
+				logger.error("录音回调失败：{}", JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback), e);
 			}
 		}
 	}

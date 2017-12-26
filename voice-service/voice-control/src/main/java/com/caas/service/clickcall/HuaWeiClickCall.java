@@ -42,7 +42,7 @@ public class HuaWeiClickCall extends DefaultServiceCallBack {
 
 		// huaWeiClickcallModel.setAccessToken(accessToken);
 		// huaWeiClickcallModel.setAppKey(appKey);
-		huaWeiClickcallModel.setBindNbr("+862869514469");
+		huaWeiClickcallModel.setBindNbr("+862835084335");
 		huaWeiClickcallModel.setCalleeNbr(addPlus86MobileNationPrefix(clickCallModel.getCalled()));
 		huaWeiClickcallModel.setCallerNbr(addPlus86MobileNationPrefix(clickCallModel.getCaller()));
 		if (StringUtil.isNotEmpty(clickCallModel.getDisplayCalled())) {

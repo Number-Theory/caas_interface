@@ -187,12 +187,12 @@ public class CommonUtils {
 	 */
 	public static boolean isPhoneNum(String phone) {
 		boolean isPhoneNum = true;
-		if (phone.matches(ConfigUtils.getProperty("phoneReg", "^((13[0-9])|(145)|(147)|(15[0-3])|(15[5-9])|(170)|(17[6-8])|(18[0-3])|(18[5-9]))\\d{8}$",
+		if (phone.matches(ConfigUtils.getProperty("phoneReg", "^((13[0-9])|(145)|(147)|(15[0-4])|(15[5-9])|(17[0-5])|(17[6-8])|(18[0-4])|(18[5-9]))\\d{8}$",
 				String.class))) {
 			isPhoneNum = true; // 0国内号码
 		} else if (phone.matches("^00.*")) {
 			isPhoneNum = true; // 1国际号码
-		} else if (phone.matches("^(010|02\\d|0[3-9]\\d{2}|400)?\\d{6,8}$")) {
+		} else if (phone.matches("^(12599|010|02\\d|0[3-9]\\d{2}|400)?\\d{6,8}$")) {
 			isPhoneNum = true; // 2固话
 		} else {
 			isPhoneNum = false; // 其他类型,非电话号码

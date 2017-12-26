@@ -16,6 +16,11 @@ import com.google.gson.GsonBuilder;
 
 public class JsonUtil {
 	public static String toJsonStr(Object obj) {
+		Gson gson = new Gson();
+		return gson.toJson(obj);
+	}
+	
+	public static String toJsonStrDisableHtmlEscaping(Object obj) {
 		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 		return gson.toJson(obj);
 	}

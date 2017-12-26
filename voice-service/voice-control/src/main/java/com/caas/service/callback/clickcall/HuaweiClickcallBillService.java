@@ -143,7 +143,7 @@ public class HuaweiClickcallBillService extends DefaultServiceCallBack {
 
 					logger.info("话单回调地址billUrl={}，开始进行回调...", billUrl);
 					ClickCallBillModel clickCallBillModel = new ClickCallBillModel();
-					clickCallBillModel.setCallId(clickCallModel.getUserId());
+					clickCallBillModel.setCallId(clickCallModel.getCallId());
 					clickCallBillModel.setCaller(clickCallModel.getCaller());
 					clickCallBillModel.setCalled(clickCallModel.getCalled());
 					clickCallBillModel.setCallerDisplay(billingModel.getCallerDisplay());
@@ -214,10 +214,10 @@ public class HuaweiClickcallBillService extends DefaultServiceCallBack {
 					recordCallback.put("recordUrl", billingModel.getRecordUrl());
 					recordCallback.put("userData", clickCallModel.getUserData());
 					try {
-						HttpUtils.httpConnectionPost(billUrl, JsonUtil.toJsonStr(recordCallback));
-						logger.info("录音回调成功：{}", JsonUtil.toJsonStr(recordCallback));
+						HttpUtils.httpConnectionPost(recordUrl, JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback));
+						logger.info("录音回调成功：{}", JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback));
 					} catch (Exception e) {
-						logger.error("录音回调失败：{}", JsonUtil.toJsonStr(recordCallback), e);
+						logger.error("录音回调失败：{}", JsonUtil.toJsonStrDisableHtmlEscaping(recordCallback), e);
 					}
 				}
 			}

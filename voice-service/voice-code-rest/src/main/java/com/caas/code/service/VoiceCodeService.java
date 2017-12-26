@@ -124,15 +124,15 @@ public class VoiceCodeService extends DefaultServiceCallBack {
 			return;
 		}
 
-		if (captchaCode.length() != 6 || captchaCode.length() != 4) {
-			HttpUtils.sendMessageJson(ctx, response.toString());
+		if (captchaCode.length() != 6 && captchaCode.length() != 4) {
 			setResponse(callId, response, BusiErrorCode.B_100033, REST_EVENT, userData);
+			HttpUtils.sendMessageJson(ctx, response.toString());
 			return;
 		}
 
 		if (!CommonCheckUtil.isNumber(captchaCode)) {
-			HttpUtils.sendMessageJson(ctx, response.toString());
 			setResponse(callId, response, BusiErrorCode.B_100034, REST_EVENT, userData);
+			HttpUtils.sendMessageJson(ctx, response.toString());
 			return;
 		}
 
