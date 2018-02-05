@@ -98,7 +98,7 @@ public class HWAXService extends DefaultServiceCallBack implements BaseAXService
 						orderRecordMap.put("bindStatus", "0");
 						Map<String, Object> sqlParams = new HashMap<String, Object>();
 						sqlParams.put("userId", minNumModel.getUserId());
-						sqlParams.put("productType", "0");
+						sqlParams.put("productType", "1");
 						Map<String, Object> callbackUrl = dao.selectOne("common.getCallBackUrl", sqlParams);
 						if (StringUtil.isNotEmpty(minNumModel.getStatusUrl())) {
 							orderRecordMap.put("statusUrl", minNumModel.getStatusUrl());

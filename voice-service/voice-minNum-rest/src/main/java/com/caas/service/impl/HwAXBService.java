@@ -191,6 +191,7 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 
 						controlResponse.getOtherMap().put("bindId", safetyCallModel.getBindId());
 						controlResponse.getOtherMap().put("userData", safetyCallModel.getUserData());
+						controlResponse.getOtherMap().put("dstVirtualNum", safetyCallModel.getDstVirtualNum());
 						HttpUtils.sendMessageJson(ctx, controlResponse.toString());
 
 					} else {
@@ -231,8 +232,8 @@ public class HwAXBService extends DefaultServiceCallBack implements BaseAXBServi
 		String caller = orderRecordMap.get("caller");
 		String callee = orderRecordMap.get("callee");
 		String dstVirtualNum = orderRecordMap.get("dstVirtualNum");
-		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, callee, dstVirtualNum);
-		final String callerNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, caller, dstVirtualNum);
+		final String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXBNUMBINDS, callee, dstVirtualNum);
+		final String callerNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXBNUMBINDS, caller, dstVirtualNum);
 		final HuaweiBindInfo HwBindInfo = new HuaweiBindInfo();
 		// 按绑定关系解绑
 		HwBindInfo.setType("2");

@@ -7,11 +7,16 @@ import org.slf4j.LoggerFactory;
 
 import com.yzx.core.util.EncryptUtil;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -163,13 +168,40 @@ public class HttpUtilsForHwMinNum
             
             connection.connect();
             
-            // 定义BufferedReader输入流来读取URL的响应
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null)
-            {
-                result.append(line);
+            int fileLength = connection.getContentLength();
+            
+            String filePathUrl = connection.getURL().getFile();
+            
+            String fileFullName = filePathUrl.substring(filePathUrl.lastIndexOf(File.separatorChar) + 1);
+            
+            System.out.println("file length---->" + fileLength);
+            
+            BufferedInputStream bin = new BufferedInputStream(connection.getInputStream());
+            
+            String path = "D://testFile" + File.separatorChar + "test.wav";
+            
+            File file = new File(path);
+            
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
             }
+            OutputStream out = new FileOutputStream(file);
+            int size = 0;
+            byte[] buf = new byte[1024];
+            while ((size = bin.read(buf)) != -1) {
+                out.write(buf, 0, size);
+            }
+            
+            bin.close();
+            out.close();
+            
+            // 定义BufferedReader输入流来读取URL的响应
+//            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//            String line;
+//            while ((line = in.readLine()) != null)
+//            {
+//                result.append(line);
+//            }
         }
         catch (Exception e)
         {

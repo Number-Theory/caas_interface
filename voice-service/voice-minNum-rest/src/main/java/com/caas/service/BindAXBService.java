@@ -5,7 +5,9 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -145,21 +147,41 @@ public class BindAXBService extends DefaultServiceCallBack {
 			safetyCallModel.setCallRestrict(callRestrict);
 		}
 
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("phoneNumber", dstVirtualNum);
-		paramMap.put("userId", userId);
-		paramMap.put("productType", "0");
-		Map<String, Object> numberMap = dao.selectOne("common.getNumByUserIdAndProductType", paramMap);
-		if (null == numberMap || numberMap.size() <= 0) {
-			logger.error("【查询号码归属平台】失败dstVirtualNum={}", dstVirtualNum);
-			setResponse(callId, response, BusiErrorCode.B_100024, REST_EVENT, userData);
-			HttpUtils.sendMessageJson(ctx, response.toString());
-			return;
+		if (StringUtil.isNotEmpty(dstVirtualNum)) {
+			Map<String, Object> paramMap = new HashMap<String, Object>();
+			paramMap.put("phoneNumber", dstVirtualNum);
+			paramMap.put("userId", userId);
+			paramMap.put("productType", "0");
+			Map<String, Object> numberMap = dao.selectOne("common.getNumByUserIdAndProductType", paramMap);
+			if (null == numberMap || numberMap.size() <= 0) {
+				logger.error("【查询号码归属平台】失败dstVirtualNum={}", dstVirtualNum);
+				setResponse(callId, response, BusiErrorCode.B_100024, REST_EVENT, userData);
+				HttpUtils.sendMessageJson(ctx, response.toString());
+				return;
+			}
+			if (StringUtil.isEmpty(cityId)) {
+				safetyCallModel.setCityId((String) numberMap.get("cityCode"));
+			}
+			
+		} else {
+			Map<String, Object> paramMap = new HashMap<String, Object>();
+			paramMap.put("userId", userId);
+			paramMap.put("productType", "0");
+			List<Map<String, Object>> phoneNumebrList = dao.selectList("common.getUsersAllPhoneNumber", paramMap);
+			if(phoneNumebrList != null && phoneNumebrList.size() > 0) {
+				Random r1 = new Random();
+				Map<String, Object> phoneNumber = phoneNumebrList.get(Math.abs(r1.nextInt() % phoneNumebrList.size()));
+				
+				safetyCallModel.setDstVirtualNum((String) phoneNumber.get("phoneNumber"));
+				dstVirtualNum = safetyCallModel.getDstVirtualNum();
+				
+				if (StringUtil.isEmpty(cityId)) {
+					safetyCallModel.setCityId((String) phoneNumber.get("cityCode"));
+				}
+			}
 		}
 
-		if (StringUtil.isEmpty(cityId)) {
-			safetyCallModel.setCityId((String) numberMap.get("cityCode"));
-		}
+		
 
 		// 请求公共鉴权组件
 		AuthModel authModel = new AuthModel();

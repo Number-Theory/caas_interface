@@ -3,7 +3,10 @@ package com.caas.service.callback.safetyCall;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,16 +63,17 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 
 		if ("Notify".equals(callBackModel)) {
 			dealEventHandle(eventType, hwCallBackModel);
+			com.yzx.access.util.HttpUtils.sendMessageJson(ctx, "success");
 		}
 		if ("Block".equals(callBackModel)) {
 			Map<String, Object> actions = new HashMap<>();
-			Map<String, Object> record = new HashMap<>();
+			// Map<String, Object> record = new HashMap<>();
 			List<Map<String, Object>> list = new ArrayList<>();
 			// 设置路由
-			if ("1".equals(hwCallBackModel.getCallEvent().getIsRecord())) {
-				record.put("operation", "Record");
-				list.add(record);
-			}
+			// if ("1".equals(hwCallBackModel.getCallEvent().getIsRecord())) {
+			// record.put("operation", "Record");
+			// list.add(record);
+			// }
 			String virtualNumber = remove86MobileNationPrefix(hwCallBackModel.getCallEvent().getVirtualNumber());
 			String caller = remove86MobileNationPrefix(hwCallBackModel.getCallEvent().getCalling());
 			String calleeNumBindKey = RedisKeyConsts.getKey(RedisKeyConsts.AXNUMBINDS, virtualNumber);
@@ -78,12 +82,13 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 				if (caller.equals(callerBindIdMap.get("caller"))) {
 					Map<String, Object> vNumber = new HashMap<String, Object>();
 					vNumber.put("operation", "vNumberRoute");
-					vNumber.put("routingAddress", callerBindIdMap.get("callee"));
+					vNumber.put("routingAddress", add86MobileNationPrefix(callerBindIdMap.get("callee")));
 					list.add(vNumber);
 				}
 			}
-			actions.put("actions", JsonUtil.toJsonStr(list));
-			response.setOtherMap(actions);
+			actions.put("actions", list);
+			com.yzx.access.util.HttpUtils.sendMessageJson(ctx, JsonUtil.toJsonStr(actions));
+			// response.setOtherMap(actions);
 		}
 	}
 
@@ -142,7 +147,7 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 				} else if (callee.equals(orderBindMap.get("caller"))) {
 					safetyCallStatusModel.setFlag("1");
 				}
-				safetyCallStatusModel.setBeginTime(DateUtil.dateStr2Str(hwCallBackModel.getCallEvent().getTimeStamp(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+				safetyCallStatusModel.setBeginTime(UTCToCST(hwCallBackModel.getCallEvent().getTimeStamp(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
 						"yyyy-MM-dd HH:mm:ss"));
 				safetyCallStatusModel.setDstVirtualNum(virtualNumber);
 				try {
@@ -173,7 +178,7 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 		String bindID = "";
 		// 呼叫开始的时间戳
 		String startTime = "";
-		String endTime = DateUtil.dateStr2Str(hwBillModel.getCallEvent().getTimeStamp(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd HH:mm:ss");
+		String endTime = UTCToCST(hwBillModel.getCallEvent().getTimeStamp(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd HH:mm:ss");
 
 		String ReleaseReason = "";
 
@@ -188,11 +193,15 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 				bindID = value;
 			}
 			if ("StartTime".equalsIgnoreCase(key)) {
-				startTime = DateUtil.dateStr2Str(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd HH:mm:ss");
+				startTime = UTCToCST(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd HH:mm:ss");
 			}
 			if ("ReleaseReason".equalsIgnoreCase(key)) {
 				ReleaseReason = value;
 			}
+		}
+
+		if (StringUtil.isBlank(duration)) {
+			duration = "0";
 		}
 
 		// 呼叫结束时间
@@ -317,15 +326,35 @@ public class HwBillCallBackservice extends DefaultServiceCallBack {
 				logger.error("话单回调失败：{}", JsonUtil.toJsonStr(safetyCallBillModel), e);
 			}
 
-			// TODO 录音回调
-			String recordUrl = String.valueOf(orderBindMap.get("recordUrl"));
-			if (StringUtil.isNotEmpty(recordUrl)) {
-				String callIdentifier = hwBillModel.getCallEvent().getCallIdentifier(); // 通话唯一标识
-				Map<String, Object> recordMap = new HashMap<String, Object>();
-				recordMap.put("callIdentifier", callIdentifier);
-				recordMap.put("recordUrl", recordUrl);
-				recordMap.put("userData", String.valueOf(orderBindMap.get("userData")));
+			if (!startTime.equals(endTime) && "1".equals(orderBindMap.get("record"))) {
+				String recordUrl = String.valueOf(orderBindMap.get("recordUrl"));
+				if (StringUtil.isNotEmpty(recordUrl)) {
+					String callIdentifier = hwBillModel.getCallEvent().getCallIdentifier(); // 通话唯一标识
+					Map<String, Object> recordMap = new HashMap<String, Object>();
+					recordMap.put("callIdentifier", callIdentifier);
+					recordMap.put("recordUrl", recordUrl);
+					recordMap.put("userData", String.valueOf(orderBindMap.get("userData")));
+					recordMap.put("callId", (String) orderBindMap.get("requestId"));
+
+					dao.insert("common.insertRecordToCallback", recordMap);
+				}
 			}
+		}
+	}
+
+	private String UTCToCST(String UTCStr, String format, String format2) {
+		try {
+			Date date = null;
+			SimpleDateFormat sdf = new SimpleDateFormat(format);
+			date = sdf.parse(UTCStr);
+			System.out.println("UTC时间: " + date);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.set(Calendar.HOUR, calendar.get(Calendar.HOUR) + 8);
+			SimpleDateFormat sdf1 = new SimpleDateFormat(format2);
+			return sdf1.format(calendar.getTime());
+		} catch (Exception e) {
+			return "";
 		}
 	}
 

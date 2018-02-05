@@ -59,6 +59,10 @@
 		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.serverProduct=#{productType} and t.phoneNumber=#{phoneNumber} and t.status='0'
 	</select>
 	
+	<select id="getUsersAllPhoneNumber" resultType="map">
+		select * from tb_caas_phonenumber t where t.userId=#{userId} and t.serverProduct=#{productType} and t.status='0'
+	</select>
+	
 	<insert id="insertBill">
 		INSERT INTO tb_caas_cdr_${nowDate} (`userId`, `productType`, `callId`, `caller`, `callerCityCode`, `callerProvider`, 
 		`callerDisplay`, `called`, `calledCityCode`, `calledProvider`, `calledDisplay`, `realityNumber`, `recordType`, 
@@ -81,7 +85,7 @@
 	
 	<select id="getAllBindByDstVirtaulNum" resultType="map">
 		select bindId,caller,callee,dstVirtualNum,maxAge,record,callerDisplay,calleeDisplay,date_format(createDate,'%Y-%m-%d %H:%i:%S') as bindTime,callRestrict from tb_caas_bind_order t where t.dstVirtualNum=#{dstVirtualNum}
-		and t.userId=#{userId} and t.bindStatus='0' and DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() 
+		and t.userId=#{userId} and t.bindStatus='0' and (DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() or maxAge = -1)
 	</select>
 	
 	<update id="updateBindStatus">
@@ -103,7 +107,7 @@
 	</select>
 	
 	<select id="getBindOrderByNumber" resultType="map">
-		select * from tb_caas_bind_order t where t.dstVirtualNum=#{virtualNumber} and t.bindStatus='0' and DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() limit 1
+		select * from tb_caas_bind_order t where t.dstVirtualNum=#{virtualNumber} and t.bindStatus='0' and (DATE_ADD(t.createDate,INTERVAL t.maxAge SECOND) > now() or maxAge = -1) limit 1
 	</select>
 	
 	<select id="getCallBackUrl" resultType="map">
@@ -125,5 +129,18 @@
 	<select id="getBlackMobile" resultType="int">
 		select count(*) from tb_caas_black_mobile t where t.mobile = #{mobile}
 	</select>
+	
+	<insert id="insertRecordToCallback">
+		INSERT INTO `tb_caas_record` (`callIdentifier`, `recordUrl`, `userData`, `callId`, `status`, `createDate`)
+		VALUES (#{callIdentifier}, #{recordUrl}, #{userData}, #{callId}, '0', now());
+	</insert>
+	
+	<select id="selectAllRecordCallback" resultType="map">
+		select * from tb_caas_record t where t.status = '0' and now() > DATE_ADD(t.createDate,INTERVAL 6 MINUTE);
+	</select>
+	
+	<update id="updateRecordCallback">
+		update tb_caas_record set status = '1' where id = #{id};
+	</update>
 	
 </mapper>
